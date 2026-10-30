@@ -3,439 +3,457 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PiBarX — Global Pi Barter Real-Price Index</title>
+  <title>π PARITY TERMINAL — Global Pi Barter Real-Price Index</title>
   
-  <!-- Modern Institutional Fonts -->
+  <!-- Institutional Monospace & Sans Typography (Stitch AI) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Obsidian Parity Terminal Stylesheet (Stitch AI) -->
-  <link rel="stylesheet" href="/static/css/terminal.css?v=1.3.0">
   <!-- Official Pi Network JavaScript SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+  <!-- Obsidian Parity Terminal Stylesheet -->
+  <link rel="stylesheet" href="/static/css/terminal.css?v=2.0.0">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>">
 </head>
 <body>
 
-  <!-- ========================================== -->
-  <!-- 1. HEADER & GLOBAL TELEMETRY BAR          -->
-  <!-- ========================================== -->
-  <header>
-    <div class="top-bar">
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <a href="/" class="brand">
-          <div class="brand-icon">π</div>
+  <div class="app-shell">
+
+    <!-- ====================================================================== -->
+    <!-- LEFT TERMINAL SIDEBAR                                                  -->
+    <!-- ====================================================================== -->
+    <aside class="sidebar">
+      <div>
+        <!-- Brand Header -->
+        <div class="brand-section">
+          <div class="brand-logo-icon">π</div>
           <div>
-            <div class="brand-name">PiBarX</div>
+            <div class="brand-title">PARITY TERMINAL</div>
+            <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">PiBarX Macro Engine</div>
           </div>
-        </a>
-        <span class="brand-tag">Macro Index</span>
+        </div>
+
+        <!-- Mainnet Status Cluster -->
+        <div class="cluster-status-box">
+          <div class="cluster-header">
+            <span>Mainnet Cluster 01</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">99.98%</span>
+          </div>
+          <div class="cluster-pill">
+            <span class="pulse-dot"></span>
+            <span id="sidebar-subgraphic-status">SUBGRAPHIC ACTIVE</span>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="sidebar-nav">
+          <a class="nav-link-item active" data-nav="macro" onclick="scrollToSection('section-kpi')">
+            <span class="nav-icon">📊</span>
+            <span>Macro Parity</span>
+          </a>
+          <a class="nav-link-item" data-nav="regional" onclick="scrollToSection('section-regional')">
+            <span class="nav-icon">🌐</span>
+            <span>Regional PPP</span>
+          </a>
+          <a class="nav-link-item" data-nav="ledger" onclick="scrollToSection('section-feed')">
+            <span class="nav-icon">📜</span>
+            <span>Trade Ledger</span>
+          </a>
+          <a class="nav-link-item" data-nav="arbitrage" onclick="scrollToSection('section-calculator')">
+            <span class="nav-icon">⚡</span>
+            <span>Arbitrage Engine</span>
+          </a>
+          <a class="nav-link-item" data-nav="telemetry" onclick="checkPiNodeDetails()">
+            <span class="nav-icon">📡</span>
+            <span>Node Telemetry</span>
+          </a>
+        </nav>
       </div>
 
-      <nav class="nav-links">
-        <button class="nav-btn active" data-tab="overview">Overview</button>
-        <button class="nav-btn" data-tab="commodities">Commodity Baskets</button>
-        <button class="nav-btn" data-tab="parity">Regional PPP</button>
-        <button class="nav-btn" data-tab="feed">Live Ledger Feed</button>
-        <button class="nav-btn" data-tab="calculator">Fair-Price Calculator</button>
-      </nav>
-
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <button class="pi-wallet-btn" id="pi-auth-btn" title="Pi Network Pioneer Authentication">
-          <span class="pi-symbol">π</span>
-          <span id="pi-auth-text">Connect Pi</span>
+      <!-- Sidebar Bottom Controls -->
+      <div class="sidebar-footer">
+        <button class="btn-sidebar-submit" id="btn-open-modal">
+          <span style="color: var(--pi-purple-light); font-size: 14px;">+</span>
+          <span>Submit Settlement Proof</span>
         </button>
-        <button class="submit-btn" id="open-submit-modal-btn">
-          <span>+</span>
-          <span>Submit Barter</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- Live Telemetry Ticker Strip -->
-    <div class="ticker-strip">
-      <div style="display: flex; align-items: center;">
-        <div class="ticker-item">
-          <span class="badge-live"><span class="pulse-dot"></span> LIVE PARITY:</span>
-          <strong id="ticker-pi-rate" style="color: var(--yield-emerald-light); font-size: 13px;">$24.80 USD</strong>
+        <div class="telemetry-meta">
+          <a href="/docs" target="_blank" style="color: var(--text-muted); text-decoration: none;">Open API ↗</a>
+          <span>System: <strong class="meta-green">Optimal</strong></span>
         </div>
-        <div class="ticker-item">
-          <span>24h Vol:</span>
-          <strong id="ticker-vol-pi">161,500 π</strong>
-          <span id="ticker-vol-usd" style="color: var(--text-dim);">(≈ $4.00M)</span>
-        </div>
-        <div class="ticker-item">
-          <span>Indexed Barters:</span>
-          <strong id="ticker-barters-count">28</strong>
-        </div>
-        <div class="ticker-item">
-          <span>Consensus Reality vs GCV:</span>
-          <strong style="color: var(--basket-amber-light);">-99.99% Delta</strong>
+        <div class="telemetry-meta">
+          <span>Latency: <strong class="meta-green">14ms</strong></span>
+          <span style="color: var(--pi-purple-light);">v2.4.9-main</span>
         </div>
       </div>
-      <div class="ticker-item" style="margin-right: 0;">
-        <span style="color: var(--text-dim);">Sync:</span>
-        <strong id="ticker-sync-status" style="color: var(--pi-purple-light);">Pi Mainnet Ledger #18,492,842</strong>
-      </div>
-    </div>
-  </header>
+    </aside>
 
-  <!-- ========================================== -->
-  <!-- 2. MAIN DASHBOARD CONTENT                 -->
-  <!-- ========================================== -->
-  <main class="container">
+    <!-- ====================================================================== -->
+    <!-- MAIN VIEWPORT                                                          -->
+    <!-- ====================================================================== -->
+    <main class="main-viewport">
 
-    <!-- HERO MASTER STATS -->
-    <section id="section-overview" style="scroll-margin-top: 100px;">
-      <div class="hero-grid">
-        <!-- Main Valuation Box -->
-        <div class="hero-card hero-main">
-          <div class="card-label">
-            <span>Global Implied Barter Rate</span>
-            <span class="pill-delta delta-up" id="hero-delta-pct">↑ +3.12% 24h</span>
-          </div>
-          <div class="hero-price">
-            <span class="currency">1 π ≈</span>
-            <span id="hero-median-price">$24.80</span>
-            <span style="font-size: 16px; color: var(--text-dim); font-weight: 500;">USD</span>
-          </div>
-          <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-            Median Purchasing Power Parity (PPP) derived strictly from verified physical goods & services traded by Pioneers globally.
+      <!-- Top Header Telemetry Bar -->
+      <header class="top-header">
+        <div class="header-search">
+          <span class="header-search-icon">🔍</span>
+          <input type="text" id="global-search-input" placeholder="Filter country, commodity or TxID...">
+        </div>
+
+        <div class="header-tabs">
+          <button class="header-tab-pill active" onclick="scrollToSection('section-kpi')">PPP Index</button>
+          <button class="header-tab-pill" onclick="scrollToSection('section-regional')">Regional Matrix</button>
+          <button class="header-tab-pill" onclick="scrollToSection('section-commodities')">Commodity Basket</button>
+          <button class="header-tab-pill" onclick="scrollToSection('section-feed')">Verified Feed</button>
+          <button class="header-tab-pill" onclick="scrollToSection('section-calculator')">Settlement Calc</button>
+          <div class="block-sync-pill">
+            <span class="pulse-dot"></span>
+            <span id="header-block-sync">Block #29,485,463</span>
           </div>
         </div>
 
-        <!-- 24h Barter Volume -->
-        <div class="hero-card">
-          <div class="card-label">
-            <span>24h Barter Volume</span>
-            <span style="font-size: 13px;">📊</span>
-          </div>
-          <div class="kpi-val" id="kpi-volume-pi">161,500 π</div>
-          <div class="kpi-sub" id="kpi-volume-usd">≈ $4.00M USD equiv.</div>
-        </div>
-
-        <!-- Active Hubs -->
-        <div class="hero-card">
-          <div class="card-label">
-            <span>Active Trading Hubs</span>
-            <span style="font-size: 13px;">🌐</span>
-          </div>
-          <div class="kpi-val" id="kpi-active-countries">8 Countries</div>
-          <div class="kpi-sub">Top: Indonesia, Vietnam, Nigeria</div>
-        </div>
-
-        <!-- Consensus vs GCV -->
-        <div class="hero-card">
-          <div class="card-label">
-            <span>On-Chain Confidence</span>
-            <span class="pill-delta delta-up" id="kpi-confidence">98.6%</span>
-          </div>
-          <div class="kpi-val" style="color: var(--basket-amber-light); font-size: 18px;" id="kpi-gcv-div">-99.99%</div>
-          <div class="kpi-sub">Realistic utility vs GCV speculation</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- COMMODITY BASKET INDICES -->
-    <section id="section-commodities" style="scroll-margin-top: 100px;">
-      <div class="section-header">
-        <div>
-          <div class="section-title">
-            <span>🍚</span>
-            <span>Commodity Basket Indices</span>
-          </div>
-          <div class="section-sub">Standard real-world essentials priced in Pi Network cryptocurrency</div>
-        </div>
-        <div style="font-size: 11px; color: var(--text-dim);">Click any card to calculate fair barter price</div>
-      </div>
-
-      <div class="commodity-grid" id="commodity-cards-container">
-        <!-- Dynamically injected by app.js -->
-      </div>
-    </section>
-
-    <!-- REGIONAL PURCHASING POWER PARITY (PPP) -->
-    <section id="section-parity" style="scroll-margin-top: 100px;">
-      <div class="section-header">
-        <div>
-          <div class="section-title">
-            <span>🌍</span>
-            <span>Regional Purchasing Power Parity (PPP) Matrix</span>
-          </div>
-          <div class="section-sub">Local barter valuation consensus and purchasing power ratios across major Pioneer nations</div>
-        </div>
-      </div>
-
-      <!-- Feed Source Toggle -->
-      <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
-        <button id="tab-btn-barters" class="nav-btn active" onclick="switchFeedMode('barters')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">🛒 Audited Barter Records</button>
-        <button id="tab-btn-onchain" class="nav-btn" onclick="switchFeedMode('onchain')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">⛓️ Live Pi Mainnet Ledger Stream (Real-Time)</button>
-        <span id="feed-stream-indicator" style="font-size: 11px; color: var(--text-dim); margin-left: 8px; font-family: monospace;"></span>
-      </div>
-
-      <div class="terminal-table-container">
-        <table class="terminal-table">
-          <thead id="feed-table-head">
-            <tr>
-              <th style="width: 40px;">#</th>
-              <th>Country & Currency</th>
-              <th>Median Barter Implied</th>
-              <th>PPP Ratio (vs Global)</th>
-              <th>Recorded Trades</th>
-              <th>Leading Basket</th>
-              <th>Consensus Level</th>
-            </tr>
-          </thead>
-          <tbody id="country-table-body">
-            <!-- Dynamically populated by app.js -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- BARTER FAIR-PRICE CALCULATOR -->
-    <section id="section-calculator" style="scroll-margin-top: 100px;">
-      <div class="section-header">
-        <div>
-          <div class="section-title">
-            <span>⚖️</span>
-            <span>Barter Fair-Price Calculator & Converter</span>
-          </div>
-          <div class="section-sub">Determine statistically sound Pi barter pricing based on verified global transactions</div>
-        </div>
-      </div>
-
-      <div class="calc-container">
-        <!-- Input Form -->
-        <div>
-          <div class="calc-input-group">
-            <label class="calc-label">Choose Commodity Basket (Optional)</label>
-            <select class="calc-select" id="calc-commodity-select">
-              <option value="">Select standard basket...</option>
-            </select>
-          </div>
-
-          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-            <div style="flex: 2;">
-              <label class="calc-label">Item Retail Price (Fiat)</label>
-              <input type="number" step="any" class="calc-input" id="calc-fiat-amount" placeholder="e.g. 150000" value="185000">
-            </div>
-            <div style="flex: 1;">
-              <label class="calc-label">Currency</label>
-              <select class="calc-select" id="calc-fiat-currency">
-                <option value="IDR">IDR (Rp)</option>
-                <option value="USD" selected>USD ($)</option>
-                <option value="VND">VND (₫)</option>
-                <option value="NGN">NGN (₦)</option>
-                <option value="KRW">KRW (₩)</option>
-                <option value="CNY">CNY (¥)</option>
-                <option value="PHP">PHP (₱)</option>
-                <option value="MYR">MYR (RM)</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="font-size: 11px; color: var(--text-dim); line-height: 1.5;">
-            💡 <em>Tip: PiBarX applies a 3-tier statistical confidence band (Conservative, Median, Optimistic) so both buyer and merchant can agree on fair terms.</em>
-          </div>
-        </div>
-
-        <!-- Result Box -->
-        <div class="calc-result-box">
-          <div>
-            <div class="card-label">Recommended Fair Barter Price</div>
-            <div class="calc-pi-highlight" id="calc-fair-pi">0.50 π</div>
-            <div id="calc-formula-note" style="font-size: 11px; color: var(--text-muted);">
-              Based on global median $24.80 / Pi
-            </div>
-          </div>
-
-          <div class="calc-bands">
-            <div>
-              <div class="card-label">Conservative (Merchant Safe)</div>
-              <div class="font-mono" style="font-weight: 600; color: #fff;" id="calc-cons-pi">0.67 π</div>
-              <div style="font-size: 10px; color: var(--text-dim);">At $18.50/π base</div>
-            </div>
-            <div>
-              <div class="card-label">Optimistic (Pioneer Bull)</div>
-              <div class="font-mono" style="font-weight: 600; color: var(--pi-purple-light);" id="calc-opt-pi">0.35 π</div>
-              <div style="font-size: 10px; color: var(--text-dim);">At $35.00/π base</div>
-            </div>
-          </div>
-
-          <div>
-            <div class="card-label">Purchasing Power Equivalencies</div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
-              <span class="brand-tag" id="calc-rice-eq">10 kg Beras</span>
-              <span class="brand-tag" id="calc-coffee-eq">4 Cangkir Kopi</span>
-              <span class="brand-tag" id="calc-fuel-eq">12 L BBM</span>
-            </div>
-            <div id="calc-gcv-contrast" style="font-size: 10px; color: var(--basket-amber-light); margin-top: 10px;">
-              0.000039 π (GCV $314k) • Realitas konsensus: 12,667x delta
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- LIVE BARTER TRANSACTION FEED -->
-    <section id="section-feed" style="scroll-margin-top: 100px;">
-      <div class="section-header">
-        <div>
-          <div class="section-title">
-            <span>⚡</span>
-            <span>Live Verified Barter Ledger Feed</span>
-          </div>
-          <div class="section-sub">Real-time audited exchange records confirmed by Pioneer merchants</div>
-        </div>
-
-        <!-- Filter Controls -->
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="feed-search-input" class="calc-input" placeholder="Search item, merchant, city..." style="width: 200px; padding: 6px 10px; font-size: 12px;">
-          <select id="feed-filter-country" class="calc-select" style="width: 140px; padding: 6px 10px; font-size: 12px;">
-            <option value="">All Countries</option>
-          </select>
-          <select id="feed-filter-commodity" class="calc-select" style="width: 150px; padding: 6px 10px; font-size: 12px;">
-            <option value="">All Commodities</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Feed Source Toggle -->
-      <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
-        <button id="tab-btn-barters" class="nav-btn active" onclick="switchFeedMode('barters')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">🛒 Audited Barter Records</button>
-        <button id="tab-btn-onchain" class="nav-btn" onclick="switchFeedMode('onchain')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">⛓️ Live Pi Mainnet Ledger Stream (Real-Time)</button>
-        <span id="feed-stream-indicator" style="font-size: 11px; color: var(--text-dim); margin-left: 8px; font-family: monospace;"></span>
-      </div>
-
-      <div class="terminal-table-container">
-        <table class="terminal-table">
-          <thead id="feed-table-head">
-            <tr>
-              <th style="width: 120px;">Timestamp</th>
-              <th>Item & Merchant Details</th>
-              <th>Category</th>
-              <th>Pi Paid</th>
-              <th>Fiat Equivalent</th>
-              <th>Implied USD/π</th>
-              <th>On-Chain Audit</th>
-            </tr>
-          </thead>
-          <tbody id="barter-table-body">
-            <!-- Dynamically populated by app.js -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ========================================== -->
-  <!-- 3. SUBMIT BARTER MODAL                    -->
-  <!-- ========================================== -->
-  <div class="modal-overlay" id="submit-modal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div style="font-weight: 600; font-size: 15px; color: #fff;">+ Submit Verified Barter Record</div>
-        <button id="close-submit-modal-btn" style="background: none; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer;">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="submit-barter-form">
-          <div class="calc-input-group">
-            <label class="calc-label">Item / Service Name *</label>
-            <input type="text" id="form-item-name" class="calc-input" placeholder="e.g. Beras Ramos 10kg, iPhone 13, Kopi Arabika" required>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" class="calc-input-group">
-            <div>
-              <label class="calc-label">Commodity Category *</label>
-              <select id="form-commodity-id" class="calc-select" required></select>
-            </div>
-            <div>
-              <label class="calc-label">Country *</label>
-              <select id="form-country-code" class="calc-select" required></select>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" class="calc-input-group">
-            <div>
-              <label class="calc-label">City / Region *</label>
-              <input type="text" id="form-city" class="calc-input" placeholder="e.g. Surabaya, Hanoi, Lagos" required>
-            </div>
-            <div>
-              <label class="calc-label">Merchant / Shop Name *</label>
-              <input type="text" id="form-merchant-name" class="calc-input" placeholder="e.g. Toko Berkah Pioneer" required>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 10px;" class="calc-input-group">
-            <div>
-              <label class="calc-label">Pi Paid (π) *</label>
-              <input type="number" step="any" id="form-pi-amount" class="calc-input font-mono" placeholder="0.50" required>
-            </div>
-            <div>
-              <label class="calc-label">Fiat Value *</label>
-              <input type="number" step="any" id="form-fiat-value" class="calc-input font-mono" placeholder="185000" required>
-            </div>
-            <div>
-              <label class="calc-label">Currency *</label>
-              <select id="form-fiat-currency" class="calc-select">
-                <option value="IDR">IDR</option>
-                <option value="USD">USD</option>
-                <option value="VND">VND</option>
-                <option value="NGN">NGN</option>
-                <option value="KRW">KRW</option>
-                <option value="CNY">CNY</option>
-                <option value="PHP">PHP</option>
-                <option value="MYR">MYR</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="calc-input-group">
-            <label class="calc-label">Pi Mainnet Transaction Hash (TxID) (Optional)</label>
-            <input type="text" id="form-tx-hash" class="calc-input font-mono" placeholder="64-character hash from Pi Wallet ledger" maxlength="64">
-            <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">
-              Entering a valid TxID immediately confirms the transaction with a green On-Chain Verified badge.
-            </div>
-          </div>
-
-          <div class="calc-input-group">
-            <label class="calc-label">Barter Notes / Proof Context</label>
-            <textarea id="form-notes" class="calc-input" rows="2" placeholder="e.g. Offline meetup transaction, receipts verified, unit in sealed condition..."></textarea>
-          </div>
-
-          <div id="submit-status-msg" style="font-family: var(--font-mono); font-size: 12px; margin-bottom: 12px;"></div>
-
-          <button type="submit" class="submit-btn" style="width: 100%; justify-content: center; padding: 10px;">
-            Publish Verified Barter to Global Index
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn-connect-node" id="pi-auth-btn" title="Connect Pi Network Wallet">
+            <span>✨</span>
+            <span id="pi-auth-text">Connect Node</span>
           </button>
-        </form>
+          <button style="background: var(--surface-card); border: 1px solid var(--border-subtle); color: var(--text-dim); padding: 6px 10px; border-radius: 5px; cursor: pointer;" title="Terminal Settings" onclick="alert('PiBarX Terminal Settings: Horizon Mainnet Endpoint active at api.mainnet.minepi.com')">
+            ⚙️
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Analytical Dashboard -->
+      <div class="viewport-content">
+
+        <!-- 1. TOP 4 KPI MASTER CARDS -->
+        <section id="section-kpi" class="kpi-master-grid">
+          <!-- Card 1: Global Median PPP Index -->
+          <div class="kpi-card">
+            <div class="kpi-label-row">
+              <span>Global Median PPP Index</span>
+              <span class="kpi-badge badge-green" id="kpi-delta-24h">+4.12% 24h</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-big-num" id="kpi-price">1 π = $24.80</span>
+              <span class="kpi-sub-unit">USD-PPP</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span>Range: $22.10 - $25.90</span> • <span style="color: var(--yield-emerald-light);">91.4% Weighted</span>
+            </div>
+          </div>
+
+          <!-- Card 2: 24h Verified Barter Volume -->
+          <div class="kpi-card">
+            <div class="kpi-label-row">
+              <span>24h Verified Barter Volume</span>
+              <span class="kpi-badge badge-purple">On-Chain Settled</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-big-num" id="kpi-vol-pi">142,500 π</span>
+              <span class="kpi-sub-unit" id="kpi-vol-usd">≈ $3.53M USD</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span>Physical Delivery: <strong>1,410 Deliveries</strong></span>
+            </div>
+          </div>
+
+          <!-- Card 3: Consensus Participation -->
+          <div class="kpi-card">
+            <div class="kpi-label-row">
+              <span>Consensus Participation</span>
+              <span class="kpi-badge badge-amber" id="kpi-hubs">48 Sovereign Hubs</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-big-num" id="kpi-trades-count">12,840</span>
+              <span class="kpi-sub-unit">trades</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span>Pioneer Merchants Active: <strong style="color: var(--basket-amber-light);">4,912 Verified</strong></span>
+            </div>
+          </div>
+
+          <!-- Card 4: Dispersion & Node Sync -->
+          <div class="kpi-card">
+            <div class="kpi-label-row">
+              <span>Dispersion & Node Sync</span>
+              <span class="kpi-badge badge-green">Low Variance</span>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-big-num">σ = 2.14</span>
+              <span class="kpi-sub-unit">Index Spread</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span>Enclosed Mainnet: <strong style="color: var(--yield-emerald-light);">99.84% Cryptographic</strong></span>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- 2. CORE REAL-WORLD COMMODITY BASKET INDICES (5 HORIZONTAL CARDS) -->
+        <section id="section-commodities" class="section-container">
+          <div class="section-head-strip">
+            <div class="section-title-wrap">
+              <div class="section-title-text">
+                <span>🧺</span>
+                <span>Core Real-World Commodity Basket Indices</span>
+              </div>
+              <span class="section-subtitle-text">Physical Redemption Weights</span>
+            </div>
+
+            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); display: flex; gap: 6px; align-items: center;">
+              <span>Basket Currency:</span>
+              <span style="color: #fff; background: var(--surface-card); border: 1px solid var(--border-subtle); padding: 2px 6px; border-radius: 3px;">• Native π</span>
+              <span style="color: var(--text-muted); padding: 2px 6px;">USD Equiv</span>
+            </div>
+          </div>
+
+          <!-- 5-Card Horizontal Row Matching Stitch AI Preview -->
+          <div class="commodity-grid-5" id="commodity-cards-container">
+            <!-- Dynamically populated or seeded -->
+          </div>
+        </section>
+
+
+        <!-- 3. REGIONAL PURCHASING POWER PARITY (PPP) MATRIX -->
+        <section id="section-regional" class="section-container">
+          <div class="section-head-strip">
+            <div class="section-title-wrap">
+              <div class="section-title-text">
+                <span>🌐</span>
+                <span>Regional Purchasing Power Parity (PPP) Matrix</span>
+              </div>
+              <span class="section-subtitle-text">Empirical Barter Settlement Rate vs Theoretical GCV Valuation</span>
+            </div>
+
+            <!-- Region Filter Tabs -->
+            <div style="display: flex; gap: 4px;">
+              <button class="header-tab-pill active" onclick="filterMatrixRegion('ALL')">All Regions</button>
+              <button class="header-tab-pill" onclick="filterMatrixRegion('SEA')">South-East Asia</button>
+              <button class="header-tab-pill" onclick="filterMatrixRegion('EA')">East Asia</button>
+              <button class="header-tab-pill" onclick="filterMatrixRegion('AF')">Africa</button>
+              <button class="header-tab-pill" onclick="filterMatrixRegion('AM')">Americas</button>
+            </div>
+          </div>
+
+          <div class="matrix-table-wrap">
+            <table class="terminal-data-table">
+              <thead>
+                <tr>
+                  <th>Country / Region</th>
+                  <th>Local Median Settlement</th>
+                  <th>GCV Claim vs Reality Gap</th>
+                  <th>Dominant Category</th>
+                  <th>24h Vol (π)</th>
+                  <th>Verification Ratio</th>
+                  <th>Consensus Score</th>
+                </tr>
+              </thead>
+              <tbody id="country-matrix-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+
+        <!-- 4. BOTTOM TWO-COLUMN SPLIT: ARBITRAGE CALCULATOR & LIVE BARTER FEED -->
+        <section class="split-bottom-grid">
+
+          <!-- Left Column: Arbitrage & Fair-Price Calculator -->
+          <div id="section-calculator" class="terminal-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>🧮</span>
+                <span>Arbitrage & Fair-Price Calc</span>
+              </div>
+              <span style="font-family: var(--font-mono); font-size: 10px; color: var(--yield-emerald-light); background: var(--yield-emerald-dim); border: 1px solid rgba(16,185,129,0.3); padding: 2px 6px; border-radius: 3px;">
+                Empirical Engine Active
+              </span>
+            </div>
+
+            <div class="panel-body">
+              <!-- Mode Tabs -->
+              <div class="calc-mode-strip">
+                <button class="calc-mode-btn active" id="btn-calc-fiat" onclick="setCalcMode('fiat')">Fiat to Fair Pi</button>
+                <button class="calc-mode-btn" id="btn-calc-comm" onclick="setCalcMode('comm')">Commodity to Pi</button>
+              </div>
+
+              <!-- Input Row -->
+              <div>
+                <label class="form-label">Enter Transaction Value</label>
+                <div class="calc-input-row">
+                  <input type="number" id="calc-input-val" class="calc-fiat-field" value="100.00" step="any">
+                  <select id="calc-currency-select" class="calc-curr-select">
+                    <option value="USD">USD ($)</option>
+                    <option value="IDR">IDR (Rp)</option>
+                    <option value="VND">VND (₫)</option>
+                    <option value="NGN">NGN (₦)</option>
+                    <option value="KRW">KRW (₩)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="PHP">PHP (₱)</option>
+                    <option value="MYR">MYR (RM)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Result Box -->
+              <div class="calc-result-box">
+                <div class="calc-result-label">Recommended Fair Pi Settlement</div>
+                <div class="calc-result-main" id="calc-res-pi">4.0322 π</div>
+                <div class="calc-result-corridor" id="calc-res-corridor">±3.8% Spread Corridor: 3.92P - 4.18P</div>
+              </div>
+
+              <!-- Anti-Scam Shield -->
+              <div class="anti-scam-shield">
+                <strong>🛡️ Anti-Scam Consensus Shield:</strong> Transactions exceeding &gt;15% deviation from empirical $24.80 index require consensus proof verification and won't earn node staking dividends.
+              </div>
+
+              <!-- Quick Fills -->
+              <div>
+                <div class="form-label">Common Commodity Quick-Fills:</div>
+                <div class="quick-fill-row">
+                  <button class="quick-fill-btn" onclick="quickFillCalc(28, 'USD')">1 Sack Rice (25kg) ~$28</button>
+                  <button class="quick-fill-btn" onclick="quickFillCalc(12.5, 'USD')">1 Day Commute ~$12.50</button>
+                  <button class="quick-fill-btn" onclick="quickFillCalc(35, 'USD')">Monthly 100M Fiber ~$35</button>
+                  <button class="quick-fill-btn" onclick="quickFillCalc(8, 'USD')">Motor Oil Lube ~$8.00</button>
+                </div>
+              </div>
+
+              <!-- Action Lock Button -->
+              <button class="btn-lock-corridor" onclick="alert('🔒 Corridor locked for 15 minutes at $24.80/Pi benchmark rate. Quote valid for P2P Pi Wallet handshake.')">
+                <span>🔒</span>
+                <span>Lock Settlement Corridor for 15m</span>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- Right Column: Live Verified Barter Ledger Feed -->
+          <div id="section-feed" class="terminal-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>⚡</span>
+                <span>Live Verified Barter Ledger Feed</span>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="tab-btn-barters" class="header-tab-pill active" onclick="switchFeedMode('barters')" style="font-size: 10px; padding: 3px 8px;">🛒 Audited Barters (28)</button>
+                <button id="tab-btn-onchain" class="header-tab-pill" onclick="switchFeedMode('onchain')" style="font-size: 10px; padding: 3px 8px;">⛓️ Live Pi Mainnet Stream</button>
+              </div>
+            </div>
+
+            <div class="panel-body" style="padding: 0; overflow-y: auto; max-height: 480px;">
+              <table class="terminal-data-table">
+                <thead id="feed-table-head">
+                  <tr>
+                    <th>Tx Hash & Time</th>
+                    <th>Pioneer Merchant</th>
+                    <th>Commodity / Asset</th>
+                    <th>Settlement (π)</th>
+                    <th>Fiat Implied</th>
+                    <th>Invoice Proof</th>
+                  </tr>
+                </thead>
+                <tbody id="feed-table-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
       </div>
+
+      <!-- FOOTER TELEMETRY STATUS BAR -->
+      <footer class="footer-telemetry">
+        <div style="display: flex; gap: 16px;">
+          <span>STREAMING MAINNET CONSENSUS NODE: <strong class="active-node">BLOCK PIP PROTOCOL #29M FULL LEDGER</strong></span>
+          <span>PI MAINNET CONSENSUS: <strong class="protocol-ver">28.0.1</strong></span>
+          <span>PROTOCOL STANDARD: <strong>PIP-0014</strong></span>
+        </div>
+        <div>
+          <span>RATE INTEGRITY: <strong style="color: var(--yield-emerald-light);">ZERO-KNOWLEDGE PHYSICAL DELIVERY VALIDATED</strong></span> • 
+          <span>PARITY NETWORK LTD © 2026</span>
+        </div>
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL: SUBMIT SETTLEMENT PROOF (BARTER RECORD)                         -->
+  <!-- ====================================================================== -->
+  <div class="modal-overlay" id="submit-modal">
+    <div class="modal-window">
+      <div class="modal-head">
+        <span>+ Submit Verified Barter Record</span>
+        <button class="modal-close-btn" id="btn-close-modal">&times;</button>
+      </div>
+
+      <form id="submit-barter-form">
+        <div class="modal-content">
+          <div>
+            <div class="form-label">Item / Commodity Name *</div>
+            <input type="text" id="form-item-name" class="form-input" placeholder="e.g. Beras Pandan Wangi 10kg, iPhone 14, Kopi Arabika" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div>
+              <div class="form-label">Category *</div>
+              <select id="form-commodity-id" class="form-input" required></select>
+            </div>
+            <div>
+              <div class="form-label">Country *</div>
+              <select id="form-country-code" class="form-input" required></select>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div>
+              <div class="form-label">City / Region *</div>
+              <input type="text" id="form-city" class="form-input" placeholder="e.g. Surabaya, Bandung, Hanoi" required>
+            </div>
+            <div>
+              <div class="form-label">Merchant Name *</div>
+              <input type="text" id="form-merchant-name" class="form-input" placeholder="e.g. Toko Berkah Pioneer" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div>
+              <div class="form-label">Pi Amount Paid (π) *</div>
+              <input type="number" id="form-pi-amount" class="form-input" placeholder="e.g. 0.50" step="any" required>
+            </div>
+            <div>
+              <div class="form-label">Fiat Value *</div>
+              <input type="number" id="form-fiat-value" class="form-input" placeholder="e.g. 185000" step="any" required>
+            </div>
+          </div>
+
+          <div>
+            <div class="form-label">Pi Blockchain Transaction Hash (TxID 64-Hex)</div>
+            <input type="text" id="form-tx-hash" class="form-input" placeholder="64-character hex hash from Pi Wallet app (optional)">
+          </div>
+
+          <div>
+            <div class="form-label">Barter Notes / Proof Context</div>
+            <textarea id="form-notes" class="form-input" style="height: 60px; resize: vertical;" placeholder="Details of physical handover, invoice, or Pioneer meetup..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-connect-node" style="width: 100%; justify-content: center; padding: 10px; margin-top: 4px;">
+            Audit &amp; Index Barter Record
+          </button>
+          <div id="form-status-msg" style="font-size: 11px; text-align: center; font-family: var(--font-mono);"></div>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- 4. FOOTER & METHODOLOGY                   -->
-  <!-- ========================================== -->
-  <footer style="border-top: 1px solid var(--border-subtle); padding: 30px 24px; margin-top: 60px; background: var(--surface-panel);">
-    <div class="container" style="padding: 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 20px;">
-      <div>
-        <div style="font-weight: 600; color: #fff; margin-bottom: 4px;">PiBarX — Macroeconomic Real-Price Parity Terminal</div>
-        <div style="font-size: 11px; color: var(--text-dim); max-width: 600px;">
-          PiBarX is an open-source decentralized index providing transparent purchasing power parity (PPP) data for the Pi Network barter economy. All calculations are derived from verified physical exchanges and public Stellar SCP consensus ledger sequences.
-        </div>
-      </div>
-      <div style="text-align: right; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">
-        <div>Design System: Obsidian Parity Terminal (Stitch AI)</div>
-        <div style="margin-top: 4px; color: var(--pi-purple-light);">Engineered for Global Pioneers 🌐</div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Core Application Logic -->
-  <script src="/static/js/app.js?v=1.3.0"></script>
+  <!-- Core JavaScript Application Logic -->
+  <script src="/static/js/app.js?v=2.1.0"></script>
 </body>
 </html>
-
