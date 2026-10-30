@@ -74,3 +74,4 @@ def verify_tx_hash(tx_hash: str) -> Dict[str, Any]:
             "synthetic_check": True,
             "message": "Format verified (Live node unreachable; queued for validator confirmation)."
         }
+

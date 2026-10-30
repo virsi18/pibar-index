@@ -96,3 +96,4 @@ class ConvertResponse(BaseModel):
     recommended_pi_range: dict
     purchasing_power_equivalent: dict
     gcv_comparison: dict
+

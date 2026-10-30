@@ -164,3 +164,4 @@ python -m unittest discover tests
 
 ## 📄 License
 Released under the [MIT License](LICENSE).
+

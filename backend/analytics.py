@@ -230,3 +230,4 @@ def calculate_barter_fair_price(fiat_amount: Optional[float] = None,
             "reality_multiple": f"{round(median_pi / max(gcv_pi, 0.000001), 1)}x real-world delta"
         }
     }
+
