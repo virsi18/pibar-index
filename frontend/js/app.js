@@ -543,30 +543,86 @@ function onIncompletePaymentFound(payment) {
 
 
 // ==========================================
+
 // FEED SOURCE TOGGLE (AUDITED BARTERS vs LIVE ON-CHAIN STREAM)
 // ==========================================
 
-let currentFeedMode = "barters"; // "barters" or "onchain"
+let currentFeedMode = "barters";
+
+window.switchFeedMode = async function(mode) {
+  console.log("[PiBarX] Switching feed mode to:", mode);
+  const btnBarters = document.getElementById("tab-btn-barters");
+  const btnOnchain = document.getElementById("tab-btn-onchain");
+  const thead = document.getElementById("feed-table-head");
+  const indicator = document.getElementById("feed-stream-indicator");
+
+  if (mode === "barters") {
+    currentFeedMode = "barters";
+    if (btnBarters) {
+      btnBarters.classList.add("active");
+      btnBarters.style.background = "var(--surface-card)";
+      btnBarters.style.borderColor = "var(--border-subtle)";
+    }
+    if (btnOnchain) {
+      btnOnchain.classList.remove("active");
+      btnOnchain.style.background = "transparent";
+      btnOnchain.style.borderColor = "transparent";
+    }
+    if (indicator) indicator.textContent = "";
+
+    if (thead) {
+      thead.innerHTML = `
+        <tr>
+          <th style="width: 120px;">Timestamp</th>
+          <th>Item & Merchant Details</th>
+          <th>Category</th>
+          <th>Pi Paid</th>
+          <th>Fiat Equivalent</th>
+          <th>Implied USD/π</th>
+          <th>On-Chain Audit</th>
+        </tr>
+      `;
+    }
+    renderBarterTable(allBarters);
+  } else {
+    currentFeedMode = "onchain";
+    if (btnOnchain) {
+      btnOnchain.classList.add("active");
+      btnOnchain.style.background = "var(--surface-card)";
+      btnOnchain.style.borderColor = "var(--border-subtle)";
+    }
+    if (btnBarters) {
+      btnBarters.classList.remove("active");
+      btnBarters.style.background = "transparent";
+      btnBarters.style.borderColor = "transparent";
+    }
+
+    if (thead) {
+      thead.innerHTML = `
+        <tr>
+          <th style="width: 130px;">Time (UTC)</th>
+          <th>Sender (From Address)</th>
+          <th>Recipient (To Address)</th>
+          <th>Asset</th>
+          <th>Pi Amount</th>
+          <th>On-Chain Status</th>
+          <th>Pi Explorer Link</th>
+        </tr>
+      `;
+    }
+    await loadLiveOnchainStream();
+  }
+};
 
 function initFeedToggle() {
   const btnBarters = document.getElementById("tab-btn-barters");
   const btnOnchain = document.getElementById("tab-btn-onchain");
 
-  if (btnBarters && btnOnchain) {
-    btnBarters.addEventListener("click", () => {
-      currentFeedMode = "barters";
-      btnBarters.classList.add("active");
-      btnOnchain.classList.remove("active");
-      document.getElementById("feed-stream-indicator").textContent = "";
-      renderBarterTable(allBarters);
-    });
-
-    btnOnchain.addEventListener("click", async () => {
-      currentFeedMode = "onchain";
-      btnOnchain.classList.add("active");
-      btnBarters.classList.remove("active");
-      await loadLiveOnchainStream();
-    });
+  if (btnBarters) {
+    btnBarters.onclick = () => window.switchFeedMode("barters");
+  }
+  if (btnOnchain) {
+    btnOnchain.onclick = () => window.switchFeedMode("onchain");
   }
 }
 
@@ -575,14 +631,19 @@ async function loadLiveOnchainStream() {
   const indicator = document.getElementById("feed-stream-indicator");
   if (!tbody) return;
 
-  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--pi-purple-light);">Connecting to Pi Mainnet Horizon Node...</td></tr>`;
-  if (indicator) indicator.textContent = "Fetching live block stream...";
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 28px; color: var(--pi-purple-light);"><span class="pulse-dot" style="display:inline-block; margin-right:8px;"></span>Connecting to Pi Mainnet Horizon Node...</td></tr>`;
+  if (indicator) indicator.innerHTML = `<span style="color:#10b981;">●</span> Fetching live block stream from Horizon...`;
 
   try {
-    const res = await fetch("/api/pi/live-transactions?limit=20");
+    const res = await fetch("/api/pi/live-transactions?limit=25");
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
     const txs = await res.json();
 
-    if (indicator) indicator.textContent = `Streaming ${txs.length} live transactions from Pi Mainnet Horizon`;
+    if (indicator) {
+      indicator.innerHTML = `<span style="color:#10b981;">● LIVE STREAM</span>: ${txs.length} transactions received from Pi Mainnet`;
+    }
 
     if (!txs || txs.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-dim);">No transactions received from node.</td></tr>`;
@@ -590,7 +651,7 @@ async function loadLiveOnchainStream() {
     }
 
     tbody.innerHTML = txs.map(t => {
-      const timeStr = t.created_at ? t.created_at.replace("T", " ").replace("Z", " UTC") : "Just now";
+      const timeStr = t.created_at ? t.created_at.replace("T", " ").replace("Z", "") : "Just now";
       const fromShort = t.from_address ? `${t.from_address.substring(0, 8)}...${t.from_address.substring(t.from_address.length - 6)}` : "Unknown";
       const toShort = t.to_address ? `${t.to_address.substring(0, 8)}...${t.to_address.substring(t.to_address.length - 6)}` : "Unknown";
       const txShort = t.tx_hash ? `${t.tx_hash.substring(0, 8)}...${t.tx_hash.substring(56)}` : "Tx";
@@ -599,23 +660,26 @@ async function loadLiveOnchainStream() {
         <tr>
           <td class="font-mono" style="font-size: 11px; color: var(--text-dim);">${timeStr}</td>
           <td>
-            <div style="font-weight: 600; color: #fff; font-family: monospace; font-size: 12px;">From: ${fromShort}</div>
-            <div style="font-size: 11px; color: var(--text-dim); font-family: monospace;">To: ${toShort}</div>
+            <div style="font-weight: 600; color: #fff; font-family: monospace; font-size: 12px;" title="${t.from_address}">${fromShort}</div>
           </td>
-          <td><span class="brand-tag" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc;">PI-MAINNET</span></td>
+          <td>
+            <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;" title="${t.to_address}">${toShort}</div>
+          </td>
+          <td><span class="brand-tag" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc;">PI NATIVE</span></td>
           <td class="font-mono" style="font-weight: 700; color: var(--pi-purple-light); font-size: 14px;">${t.amount_pi.toFixed(2)} π</td>
-          <td class="font-mono" style="color: var(--text-dim);">-</td>
-          <td class="font-mono" style="color: var(--text-dim);">-</td>
           <td>
             <span class="badge-status status-onchain" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">● Confirmed On-Chain</span>
-            <div style="margin-top: 4px;">
-              <a href="https://api.mainnet.minepi.com/transactions/${t.tx_hash}" target="_blank" class="tx-hash-link font-mono" style="font-size: 11px; color: var(--pi-purple-light);">${txShort} ↗</a>
-            </div>
+          </td>
+          <td>
+            <a href="https://api.mainnet.minepi.com/transactions/${t.tx_hash}" target="_blank" class="tx-hash-link font-mono" style="font-size: 11px; color: var(--pi-purple-light); display: inline-flex; align-items:center; gap:4px;" title="View raw transaction on Pi Horizon Node">
+              ${txShort} ↗
+            </a>
           </td>
         </tr>
       `;
     }).join("");
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--basket-amber);">Error connecting to Pi Mainnet stream.</td></tr>`;
+    console.error("[PiBarX] Error fetching live onchain stream:", err);
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--danger-crimson);">Error connecting to Pi Mainnet stream: ${err.message}</td></tr>`;
   }
 }

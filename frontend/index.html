@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Obsidian Parity Terminal Stylesheet (Stitch AI) -->
-  <link rel="stylesheet" href="/static/css/terminal.css">
+  <link rel="stylesheet" href="/static/css/terminal.css?v=1.3.0">
   <!-- Official Pi Network JavaScript SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>">
@@ -169,14 +169,14 @@
 
       <!-- Feed Source Toggle -->
       <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
-        <button id="tab-btn-barters" class="nav-btn active" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">🛒 Audited Barter Records</button>
-        <button id="tab-btn-onchain" class="nav-btn" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">⛓️ Live Pi Mainnet Ledger Stream (Real-Time)</button>
+        <button id="tab-btn-barters" class="nav-btn active" onclick="switchFeedMode('barters')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">🛒 Audited Barter Records</button>
+        <button id="tab-btn-onchain" class="nav-btn" onclick="switchFeedMode('onchain')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">⛓️ Live Pi Mainnet Ledger Stream (Real-Time)</button>
         <span id="feed-stream-indicator" style="font-size: 11px; color: var(--text-dim); margin-left: 8px; font-family: monospace;"></span>
       </div>
 
       <div class="terminal-table-container">
         <table class="terminal-table">
-          <thead>
+          <thead id="feed-table-head">
             <tr>
               <th style="width: 40px;">#</th>
               <th>Country & Currency</th>
@@ -304,14 +304,14 @@
 
       <!-- Feed Source Toggle -->
       <div style="display: flex; gap: 8px; margin-bottom: 12px; align-items: center;">
-        <button id="tab-btn-barters" class="nav-btn active" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">🛒 Audited Barter Records</button>
-        <button id="tab-btn-onchain" class="nav-btn" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">⛓️ Live Pi Mainnet Ledger Stream (Real-Time)</button>
+        <button id="tab-btn-barters" class="nav-btn active" onclick="switchFeedMode('barters')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">🛒 Audited Barter Records</button>
+        <button id="tab-btn-onchain" class="nav-btn" onclick="switchFeedMode('onchain')" style="font-size: 12px; padding: 6px 14px; cursor: pointer;">⛓️ Live Pi Mainnet Ledger Stream (Real-Time)</button>
         <span id="feed-stream-indicator" style="font-size: 11px; color: var(--text-dim); margin-left: 8px; font-family: monospace;"></span>
       </div>
 
       <div class="terminal-table-container">
         <table class="terminal-table">
-          <thead>
+          <thead id="feed-table-head">
             <tr>
               <th style="width: 120px;">Timestamp</th>
               <th>Item & Merchant Details</th>
@@ -435,7 +435,7 @@
   </footer>
 
   <!-- Core Application Logic -->
-  <script src="/static/js/app.js"></script>
+  <script src="/static/js/app.js?v=1.3.0"></script>
 </body>
 </html>
 
