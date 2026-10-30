@@ -193,12 +193,16 @@ app.include_router(api_router)
 # Diagnostic 404 handler for debugging path routing
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, exc):
+    headers_dict = {k: v for k, v in request.headers.items()}
     return JSONResponse(
         status_code=404,
         content={
             "detail": "Not Found",
             "path": request.url.path,
-            "scope_path": request.scope.get("path")
+            "scope_path": request.scope.get("path"),
+            "headers": headers_dict,
+            "scope_keys": list(request.scope.keys()),
+            "raw_path": str(request.scope.get("raw_path"))
         }
     )
 
