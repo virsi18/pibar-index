@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCalculator();
   initSubmitModal();
   initPiIntegration();
+  initFeedToggle();
   loadAllData();
 
   // Auto-refresh summary data every 30 seconds
@@ -538,4 +539,83 @@ function setupPiBrowserSDK() {
 
 function onIncompletePaymentFound(payment) {
   console.log("[PiBarX] Incomplete payment found:", payment);
+}
+
+
+// ==========================================
+// FEED SOURCE TOGGLE (AUDITED BARTERS vs LIVE ON-CHAIN STREAM)
+// ==========================================
+
+let currentFeedMode = "barters"; // "barters" or "onchain"
+
+function initFeedToggle() {
+  const btnBarters = document.getElementById("tab-btn-barters");
+  const btnOnchain = document.getElementById("tab-btn-onchain");
+
+  if (btnBarters && btnOnchain) {
+    btnBarters.addEventListener("click", () => {
+      currentFeedMode = "barters";
+      btnBarters.classList.add("active");
+      btnOnchain.classList.remove("active");
+      document.getElementById("feed-stream-indicator").textContent = "";
+      renderBarterTable(allBarters);
+    });
+
+    btnOnchain.addEventListener("click", async () => {
+      currentFeedMode = "onchain";
+      btnOnchain.classList.add("active");
+      btnBarters.classList.remove("active");
+      await loadLiveOnchainStream();
+    });
+  }
+}
+
+async function loadLiveOnchainStream() {
+  const tbody = document.getElementById("barter-table-body");
+  const indicator = document.getElementById("feed-stream-indicator");
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--pi-purple-light);">Connecting to Pi Mainnet Horizon Node...</td></tr>`;
+  if (indicator) indicator.textContent = "Fetching live block stream...";
+
+  try {
+    const res = await fetch("/api/pi/live-transactions?limit=20");
+    const txs = await res.json();
+
+    if (indicator) indicator.textContent = `Streaming ${txs.length} live transactions from Pi Mainnet Horizon`;
+
+    if (!txs || txs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-dim);">No transactions received from node.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = txs.map(t => {
+      const timeStr = t.created_at ? t.created_at.replace("T", " ").replace("Z", " UTC") : "Just now";
+      const fromShort = t.from_address ? `${t.from_address.substring(0, 8)}...${t.from_address.substring(t.from_address.length - 6)}` : "Unknown";
+      const toShort = t.to_address ? `${t.to_address.substring(0, 8)}...${t.to_address.substring(t.to_address.length - 6)}` : "Unknown";
+      const txShort = t.tx_hash ? `${t.tx_hash.substring(0, 8)}...${t.tx_hash.substring(56)}` : "Tx";
+
+      return `
+        <tr>
+          <td class="font-mono" style="font-size: 11px; color: var(--text-dim);">${timeStr}</td>
+          <td>
+            <div style="font-weight: 600; color: #fff; font-family: monospace; font-size: 12px;">From: ${fromShort}</div>
+            <div style="font-size: 11px; color: var(--text-dim); font-family: monospace;">To: ${toShort}</div>
+          </td>
+          <td><span class="brand-tag" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc;">PI-MAINNET</span></td>
+          <td class="font-mono" style="font-weight: 700; color: var(--pi-purple-light); font-size: 14px;">${t.amount_pi.toFixed(2)} π</td>
+          <td class="font-mono" style="color: var(--text-dim);">-</td>
+          <td class="font-mono" style="color: var(--text-dim);">-</td>
+          <td>
+            <span class="badge-status status-onchain" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">● Confirmed On-Chain</span>
+            <div style="margin-top: 4px;">
+              <a href="https://api.mainnet.minepi.com/transactions/${t.tx_hash}" target="_blank" class="tx-hash-link font-mono" style="font-size: 11px; color: var(--pi-purple-light);">${txShort} ↗</a>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--basket-amber);">Error connecting to Pi Mainnet stream.</td></tr>`;
+  }
 }

@@ -7,7 +7,7 @@ import json
 import re
 import urllib.request
 import urllib.error
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 PI_HORIZON_BASE = "https://api.mainnet.minepi.com"
 TX_HASH_REGEX = re.compile(r"^[a-fA-F0-9]{64}$")
@@ -108,3 +108,38 @@ def get_node_status() -> Dict[str, Any]:
         }
 
 
+
+
+def get_live_onchain_payments(limit: int = 10) -> List[Dict[str, Any]]:
+    """
+    Fetch the most recent confirmed payment transactions directly from
+    the Pi Network Mainnet Horizon ledger.
+    """
+    limit = max(1, min(limit, 50))
+    url = f"{PI_HORIZON_BASE}/payments?order=desc&limit={limit}"
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "PiBarX-Telemetry/1.0", "Accept": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+                records = data.get("_embedded", {}).get("records", [])
+                results = []
+                for r in records:
+                    results.append({
+                        "id": r.get("id"),
+                        "type": r.get("type"),
+                        "amount_pi": float(r.get("amount", 0.0)),
+                        "from_address": r.get("from"),
+                        "to_address": r.get("to"),
+                        "created_at": r.get("created_at"),
+                        "tx_hash": r.get("transaction_hash"),
+                        "asset_type": r.get("asset_type", "native"),
+                        "is_live_mainnet": True
+                    })
+                return results
+    except Exception as e:
+        return []
+    return []
