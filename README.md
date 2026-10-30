@@ -1,4 +1,4 @@
-# ⚡ PiBarX - Global Pi Barter Real-Price Index
+# ⚡ PiBarX — Global Pi Barter Real-Price Index
 
 > **Macroeconomic Purchasing Power Parity (PPP) & Commodity Barter Consensus Engine for the Pi Network Ecosystem.**
 
@@ -10,16 +10,44 @@
 
 ---
 
-## 📌 Executive Summary & Problem Statement
+## 🎯 Purpose & Core Mission
 
-Across the global Pi Network ecosystem, hundreds of thousands of Pioneers engage in daily peer-to-peer barter transactions—trading goods and services ranging from everyday groceries and coffee to electronics, smartphones, and motorcycles. 
+The global **Pi Network** ecosystem is currently witnessing the largest decentralized peer-to-peer barter experiment in cryptocurrency history. Across Southeast Asia, Africa, East Asia, Europe, and the Americas, millions of Pioneers are actively trading physical goods and services for Pi coins ($\pi$).
 
-However, the ecosystem faces severe **price disorientation**:
-- Some merchants price their goods assuming speculative **Global Consensus Value (GCV)** at **$314,159 / $\pi$**, leading to non-executable listings.
-- Other local exchanges trade at **$0.25 to $1.50 / $\pi$**, while established merchants in South Korea, Vietnam, and Indonesia transact at **$10.00 to $35.00 / $\pi$**.
-- Pioneers lack an objective, real-time index to answer the fundamental question: ***"What is 1 $\pi$ actually worth in real-world purchasing power today?"***
+However, the ecosystem suffers from severe **price disorientation**:
+1. **Speculative Extremes**: Unverified claims promoting **Global Consensus Value (GCV)** at **$314,159 / $\pi$** lead to non-executable barter listings that freeze physical merchant commerce.
+2. **Price Fragmentation**: Local exchanges trade anywhere between **$0.25 and $35.00 / $\pi$**, creating uncertainty and leaving Pioneers vulnerable to mispricing or scam listings.
+3. **The Absence of a Macroeconomic Anchor**: Pioneers lack an objective, real-time benchmark answering: ***"What is 1 $\pi$ actually worth in real-world purchasing power today?"***
 
-**PiBarX** solves this by establishing a decentralized, commodity-backed **Purchasing Power Parity (PPP) index**—inspired by *The Economist's Big Mac Index*, but built natively for the Pi Network barter economy.
+### The Mission of PiBarX
+Inspired by *The Economist's Big Mac Index*, **PiBarX** establishes an empirical, commodity-backed **Purchasing Power Parity (PPP) Index** tailored specifically for the Pi Network barter economy. By indexing real transactions across standardized commodity baskets (Rice, Coffee, Fuel, Hardware, Food Staples) and validating transaction hashes directly against the **Pi Mainnet Horizon Node**, PiBarX provides Pioneers and merchants with a transparent, mathematically grounded fair-price corridor.
+
+---
+
+## 🤝 Community Participation & Contribution Guide
+
+PiBarX is designed as a **decentralized, community-driven oracle**. The accuracy and robustness of the index grow with every verified trade recorded by the Pioneer community. Here is how you can take part:
+
+### 1. 🛒 Everyday Pioneers & Shoppers
+* **Log Real Barters**: Whenever you purchase goods or services using Pi (at a local cafe, grocery store, market, or P2P handshake), log the exchange using the **`+ Submit Settlement Proof`** button in the terminal.
+* **Provide Transaction Hashes (TxID)**: Copy the 64-character hexadecimal transaction hash from your official **Pi Wallet** app. Providing a valid TxID immediately grants your trade **`● Verified On-Chain`** status, anchoring it to the immutable Pi Mainnet ledger sequence.
+* **Audit Transparency**: Click on any transaction hash in the Live Feed table to inspect the transaction directly on the Pi Mainnet Horizon node (`https://api.mainnet.minepi.com/transactions/{tx_hash}`).
+
+### 2. 🏪 Pioneer Merchants & Store Owners
+* **Price Standardization**: Use the built-in **Arbitrage & Fair-Price Calculator** to calculate realistic Pi prices for your inventory based on local fiat costs (USD, IDR, VND, NGN, KRW, CNY, PHP, MYR).
+* **Adopt the 3-Tier Settlement Corridor**:
+  * **Conservative Tier (25th Percentile)**: High-liquidity floor for fast inventory turnover.
+  * **Median Consensus (50th Percentile)**: The recommended fair market rate for sustainable daily commerce.
+  * **Optimistic Pioneer Tier (75th Percentile)**: Community-supported valuation for Pioneer ecosystem builders.
+* **Submit Business Invoices**: Log physical handovers and invoice numbers in the notes field to bolster your merchant consensus score.
+
+### 3. 🖥️ Node Runners & Technical Pioneers
+* **Horizon Node Peering**: Configure PiBarX to point to your local Pi Mainnet validator or Horizon instance by setting the `PI_HORIZON_BASE` environment variable.
+* **Audit On-Chain Logic**: Review the verification engine in [`backend/blockchain.py`](backend/blockchain.py) to ensure stellar-core compatibility and cryptographic integrity.
+
+### 4. 💻 Open-Source Developers
+* **Add Commodity Baskets**: Fork the repository and submit Pull Requests to add regional commodity baskets tailored to your country's agricultural or industrial staples.
+* **Build Pi Browser Ecosystem Apps**: Integrate PiBarX's open REST API (`/api/summary`, `/api/calculator`, `/api/commodities`) into Pi Browser dApps, e-commerce storefronts, and point-of-sale (POS) terminals.
 
 ---
 
@@ -47,10 +75,11 @@ To bridge physical reality with cryptographic proof, PiBarX creates a dual-layer
      $$\text{Implied Price} = \frac{\text{Local Market Value (USD)}}{\text{Pi Amount Paid}}$$
    - Tags verified trades as **`● Verified On-Chain`**.
 
-### 3. Data Architecture: Seed Baseline vs Crowdsourced Reports vs Live Stream
-* **Curated Baseline (28 Seed Records)**: Realistic transaction benchmarks based on authentic community barter reports across Indonesia, Vietnam, Nigeria, South Korea, China, and the US ($0.50 – $35.00/$\pi$) to establish initial statistical liquidity corridors.
-* **Live Crowdsourced Barters**: Pioneers submit real barter records through the `+ Submit Barter` terminal UI, which are cryptographically verified and permanently indexed into `pibarx.db`.
-* **Live Pi Mainnet Stream**: Direct real-time streaming of raw payment operations taking place on Pi Network Mainnet right now (`api.mainnet.minepi.com/payments`), complete with public keys, amounts, and explorer links.
+### 3. Multi-Layer Anti-Fake & Outlier Protection
+To prevent bad actors from manipulating the index with fabricated or spam transactions:
+* **Blockchain Gatekeeper**: Transactions submitted with invalid or non-existent hashes are automatically flagged as `REJECTED_ONCHAIN` and excluded from index computations.
+* **Statistical Anomaly Filter**: Extreme outlier submissions (e.g., claiming 1 cup of coffee = 314,159 $\pi$ or 0.00001 $\pi$) are tagged as `OUTLIER_FLAGGED` and trimmed from calculations.
+* **Median Robustness (P50)**: By employing the statistical median rather than arithmetic mean, the index is naturally immune to skew from peripheral outliers.
 
 ---
 
@@ -60,7 +89,7 @@ To bridge physical reality with cryptographic proof, PiBarX creates a dual-layer
 Tracks the real exchange value of Pi against everyday physical goods across 7 international commodity baskets:
 - **Jasmine Rice (10kg)** (`RICE`)
 - **Arabica Whole Bean Coffee (1kg)** (`COFFEE`)
-- **Gasoline / Transport Fuel (10L)** (`FUEL`)
+- **Gasoline / Transport Fuel (50L)** (`FUEL`)
 - **Weekly Food & Groceries Basket** (`GROCERIES`)
 - **Mid-Tier 5G Smartphone** (`PHONE`)
 - **Commuter Motorbike** (`MOTO`)
@@ -112,7 +141,7 @@ pibar-index/
 │   ├── __init__.py
 │   ├── main.py              # FastAPI Web & REST Service
 │   ├── models.py            # Pydantic Schemas & DTOs
-│   ├── database.py          # SQLite Engine & Initial Barter Seed Data
+│   ├── database.py          # SQLite Engine & Seed Data with Real Mainnet Hashes
 │   ├── blockchain.py        # Pi Mainnet Horizon Verification Client
 │   └── analytics.py         # PPP Math, Median Implied Rates & Converter
 ├── frontend/
@@ -125,9 +154,9 @@ pibar-index/
 │       └── stitch_preview.png
 ├── tests/
 │   └── test_api.py          # Comprehensive Unit & Integration Tests
-├── run.py                   # One-Click Application Launcher
+├── run.py                   # One-Click Application Launcher (with auto-reload)
 ├── requirements.txt         # Production Dependencies
-└── README.md                # System Documentation
+└── README.md                # System Documentation & Community Guide
 ```
 
 ---
