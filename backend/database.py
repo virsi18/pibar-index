@@ -10,7 +10,28 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone, timedelta
 
-DB_PATH = Path(__file__).resolve().parent.parent / "pibarx.db"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BUNDLE_DB = PROJECT_ROOT / "pibarx.db"
+
+import os
+import shutil
+import tempfile
+
+# Serverless environment support (Vercel / AWS Lambda has read-only root, /tmp is writable)
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DB_PATH = Path(tempfile.gettempdir()) / "pibarx.db"
+else:
+    DB_PATH = BUNDLE_DB
+
+
+def ensure_serverless_db():
+    """Ensure database file exists and is ready in serverless environments."""
+    if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+        if not DB_PATH.exists() and BUNDLE_DB.exists():
+            try:
+                shutil.copy2(BUNDLE_DB, DB_PATH)
+            except Exception:
+                pass
 
 # Global Fiat exchange rates to USD for normalization
 FIAT_TO_USD = {
@@ -26,6 +47,7 @@ FIAT_TO_USD = {
 
 
 def get_db():
+    ensure_serverless_db()
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     return conn

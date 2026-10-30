@@ -188,6 +188,23 @@ Open your browser to access the Obsidian Parity Terminal dashboard.
 
 ---
 
+## ☁️ Deployment to Vercel
+
+PiBarX is pre-configured for **zero-configuration serverless deployment on Vercel** with global Edge CDN caching for frontend assets and serverless Python execution for the FastAPI backend.
+
+### Quick Deployment via Vercel Dashboard:
+1. Log in to [vercel.com](https://vercel.com) and click **"Add New..."** &rarr; **"Project"**.
+2. Select or import your repository `virsi18/pibar-index` and click **"Import"**.
+3. Leave all settings at their default values:
+   - **Framework Preset**: `Other`
+   - **Root Directory**: `./`
+   - **Build & Development Settings**: *(default)*
+4. Click **"Deploy"**.
+
+Vercel will automatically read `vercel.json`, install dependencies from `requirements.txt`, provision the `@vercel/python` serverless runtime via `api/index.py`, and map all static assets (`/static/*`) straight to the global Edge CDN.
+
+---
+
 ## 📡 REST API Reference
 
 | Endpoint | Method | Description |
