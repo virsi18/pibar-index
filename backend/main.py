@@ -100,18 +100,35 @@ def get_barters(
 
 @app.post("/api/barters/submit")
 def submit_barter(data: BarterSubmission):
-    """Submit a new completed barter transaction with optional on-chain Pi verification."""
-    # If Tx hash provided, run on-chain validation check
+    """Submit a new completed barter transaction with cryptographic on-chain verification."""
+    tx_hash = (data.tx_hash or "").strip()
     blockchain_info = {}
-    if data.tx_hash and len(data.tx_hash.strip()) == 64:
-        blockchain_info = verify_tx_hash(data.tx_hash)
+    verification_status = "COMMUNITY_AUDITED"
+
+    if tx_hash:
+        blockchain_info = verify_tx_hash(tx_hash)
+        if blockchain_info.get("verified") is True:
+            verification_status = "VERIFIED_ONCHAIN"
+        else:
+            verification_status = "REJECTED_ONCHAIN"
+
+    # Outlier & Anti-Fake Filter (Drop spam like GCV $314k per cup or 0.0001 Pi)
+    curr = data.fiat_currency.upper()
+    rate = 1.0 if curr == "USD" else 0.000062
+    implied_test = (data.fiat_value * rate) / max(data.pi_amount, 0.00001)
+    if implied_test > 5000.0 or implied_test < 0.1:
+        verification_status = "OUTLIER_FLAGGED"
 
     submission_dict = data.model_dump()
-    result = insert_barter(submission_dict)
+    result = insert_barter(submission_dict, verification_status=verification_status)
     result["blockchain_verification"] = blockchain_info
+
+    is_valid = verification_status in ["VERIFIED_ONCHAIN", "COMMUNITY_AUDITED"]
+
     return {
-        "success": True,
-        "message": "Barter record successfully audited and indexed into PiBarX.",
+        "success": is_valid,
+        "status": verification_status,
+        "message": "Barter confirmed and indexed." if is_valid else f"Audit Warning: {blockchain_info.get('message', 'Flagged as statistical anomaly / unverified hash.')}",
         "barter": result
     }
 

@@ -223,8 +223,8 @@ def _seed_history(conn):
     conn.commit()
 
 
-def insert_barter(submission_data: dict) -> Dict[str, Any]:
-    """Insert a new user-submitted barter into the database."""
+def insert_barter(submission_data: dict, verification_status: Optional[str] = None) -> Dict[str, Any]:
+    """Insert a new user-submitted barter into the database with audit status."""
     conn = get_db()
     c = conn.cursor()
 
@@ -234,9 +234,9 @@ def insert_barter(submission_data: dict) -> Dict[str, Any]:
     curr = submission_data["fiat_currency"].upper()
     rate = FIAT_TO_USD.get(curr, 1.0)
     fiat_usd = round(submission_data["fiat_value"] * rate, 2)
-    implied_usd = round(fiat_usd / submission_data["pi_amount"], 2)
+    implied_usd = round(fiat_usd / max(submission_data["pi_amount"], 0.000001), 2)
 
-    status = "VERIFIED_ONCHAIN" if len(submission_data.get("tx_hash", "")) == 64 else "COMMUNITY_AUDITED"
+    status = verification_status or ("VERIFIED_ONCHAIN" if len(submission_data.get("tx_hash", "")) == 64 else "COMMUNITY_AUDITED")
 
     c.execute("""
         INSERT INTO barters (
