@@ -184,9 +184,16 @@ def verify_transaction(tx_hash: str):
 # FRONTEND STATIC ASSETS SERVING
 # ==========================================
 
-if FRONTEND_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
+TARGET_DIR = PUBLIC_DIR if PUBLIC_DIR.exists() else FRONTEND_DIR
+
+if TARGET_DIR.exists():
+    static_mount_dir = TARGET_DIR / "static" if (TARGET_DIR / "static").exists() else TARGET_DIR
+    app.mount("/static", StaticFiles(directory=str(static_mount_dir)), name="static")
 
     @app.get("/")
     def serve_index():
-        return FileResponse(str(FRONTEND_DIR / "index.html"))
+        index_file = TARGET_DIR / "index.html"
+        if index_file.exists():
+            return FileResponse(str(index_file))
+        return {"message": "PiBarX API Online", "docs": "/docs"}
