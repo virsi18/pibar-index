@@ -6,10 +6,10 @@ FastAPI Application & Web Service
 import os
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from backend.database import init_db, get_db, insert_barter
 from backend.models import BarterSubmission, ConvertRequest
@@ -40,31 +40,36 @@ app.add_middleware(
 )
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
-
+PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
+TARGET_DIR = PUBLIC_DIR if PUBLIC_DIR.exists() else FRONTEND_DIR
 
 # ==========================================
-# API ENDPOINTS
+# API ROUTER (Dual-mount: /api and /)
+# Handles both local dev (/api/*) and Vercel prefix stripping (/*)
 # ==========================================
 
-@app.get("/api/summary")
+api_router = APIRouter()
+
+
+@api_router.get("/summary")
 def get_summary():
     """Retrieve global master KPIs: median implied rate, volume, and consensus metrics."""
     return get_summary_metrics()
 
 
-@app.get("/api/commodities")
+@api_router.get("/commodities")
 def get_commodities():
     """Retrieve all commodity basket indices with benchmark rates and 24h deltas."""
     return get_commodity_indices()
 
 
-@app.get("/api/countries")
+@api_router.get("/countries")
 def get_countries():
     """Retrieve country-level purchasing power parity (PPP) rankings."""
     return get_country_parities()
 
 
-@app.get("/api/barters")
+@api_router.get("/barters")
 def get_barters(
     commodity: Optional[str] = Query(None),
     country: Optional[str] = Query(None),
@@ -98,7 +103,7 @@ def get_barters(
     return rows
 
 
-@app.post("/api/barters/submit")
+@api_router.post("/barters/submit")
 def submit_barter(data: BarterSubmission):
     """Submit a new completed barter transaction with cryptographic on-chain verification."""
     tx_hash = (data.tx_hash or "").strip()
@@ -133,7 +138,7 @@ def submit_barter(data: BarterSubmission):
     }
 
 
-@app.get("/api/calculator")
+@api_router.get("/calculator")
 def convert_calculator(
     fiat_amount: Optional[float] = Query(None),
     fiat_currency: str = Query("USD"),
@@ -151,7 +156,7 @@ def convert_calculator(
     )
 
 
-@app.get("/api/charts/history")
+@api_router.get("/charts/history")
 def get_chart_history():
     """Retrieve historical price points for trend analysis."""
     conn = get_db()
@@ -162,38 +167,54 @@ def get_chart_history():
     return rows
 
 
-@app.get("/api/pi/status")
+@api_router.get("/pi/status")
 def get_pi_network_telemetry():
     """Retrieve live node health, core version, and current ledger sequence from Pi Mainnet Horizon."""
     return get_node_status()
 
 
-@app.get("/api/pi/live-transactions")
+@api_router.get("/pi/live-transactions")
 def get_live_transactions(limit: int = 15):
     """Stream the latest real payment transactions directly from Pi Mainnet Horizon node."""
     return get_live_onchain_payments(limit=limit)
 
 
-@app.get("/api/verify-tx/{tx_hash}")
+@api_router.get("/verify-tx/{tx_hash}")
 def verify_transaction(tx_hash: str):
     """Directly query the Pi Network Mainnet Horizon node for a specific TxID."""
     return verify_tx_hash(tx_hash)
+
+
+# Mount router BOTH with /api prefix and at root /
+app.include_router(api_router, prefix="/api")
+app.include_router(api_router)
+
+
+# Diagnostic 404 handler for debugging path routing
+@app.exception_handler(404)
+async def custom_404_handler(request: Request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "detail": "Not Found",
+            "path": request.url.path,
+            "scope_path": request.scope.get("path")
+        }
+    )
 
 
 # ==========================================
 # FRONTEND STATIC ASSETS SERVING
 # ==========================================
 
-PUBLIC_DIR = Path(__file__).resolve().parent.parent / "public"
-TARGET_DIR = PUBLIC_DIR if PUBLIC_DIR.exists() else FRONTEND_DIR
-
 if TARGET_DIR.exists():
     static_mount_dir = TARGET_DIR / "static" if (TARGET_DIR / "static").exists() else TARGET_DIR
     app.mount("/static", StaticFiles(directory=str(static_mount_dir)), name="static")
 
-    @app.get("/")
-    def serve_index():
-        index_file = TARGET_DIR / "index.html"
-        if index_file.exists():
-            return FileResponse(str(index_file))
-        return {"message": "PiBarX API Online", "docs": "/docs"}
+
+@app.get("/")
+def serve_index():
+    index_file = TARGET_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {"message": "PiBarX API Online", "docs": "/docs"}
