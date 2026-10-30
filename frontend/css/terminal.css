@@ -647,3 +647,51 @@ table.terminal-table tr:hover td {
   }
 }
 
+
+
+/* Pi Network Pioneer Wallet Button */
+.pi-wallet-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: var(--pi-purple-light);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pi-wallet-btn:hover {
+  background: rgba(99, 102, 241, 0.22);
+  border-color: var(--pi-purple);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+}
+
+.pi-wallet-btn .pi-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--pi-purple);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pi-wallet-btn.authenticated {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--yield-emerald-light);
+}
+
+.pi-wallet-btn.authenticated .pi-symbol {
+  background: var(--yield-emerald);
+}

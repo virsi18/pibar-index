@@ -19,7 +19,7 @@ from backend.analytics import (
     get_country_parities,
     calculate_barter_fair_price
 )
-from backend.blockchain import verify_tx_hash
+from backend.blockchain import verify_tx_hash, get_node_status
 
 # Initialize Database on import
 init_db()
@@ -143,6 +143,12 @@ def get_chart_history():
     rows = [dict(r) for r in c.fetchall()]
     conn.close()
     return rows
+
+
+@app.get("/api/pi/status")
+def get_pi_network_telemetry():
+    """Retrieve live node health, core version, and current ledger sequence from Pi Mainnet Horizon."""
+    return get_node_status()
 
 
 @app.get("/api/verify-tx/{tx_hash}")

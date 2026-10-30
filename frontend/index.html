@@ -12,6 +12,8 @@
 
   <!-- Obsidian Parity Terminal Stylesheet (Stitch AI) -->
   <link rel="stylesheet" href="/static/css/terminal.css">
+  <!-- Official Pi Network JavaScript SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>">
 </head>
 <body>
@@ -39,7 +41,11 @@
         <button class="nav-btn" data-tab="calculator">Fair-Price Calculator</button>
       </nav>
 
-      <div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="pi-wallet-btn" id="pi-auth-btn" title="Pi Network Pioneer Authentication">
+          <span class="pi-symbol">π</span>
+          <span id="pi-auth-text">Connect Pi</span>
+        </button>
         <button class="submit-btn" id="open-submit-modal-btn">
           <span>+</span>
           <span>Submit Barter</span>

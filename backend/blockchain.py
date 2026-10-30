@@ -75,3 +75,36 @@ def verify_tx_hash(tx_hash: str) -> Dict[str, Any]:
             "message": "Format verified (Live node unreachable; queued for validator confirmation)."
         }
 
+
+def get_node_status() -> Dict[str, Any]:
+    """
+    Query the root Pi Network Mainnet Horizon node for live network telemetry,
+    including current ledger sequence and core version.
+    """
+    try:
+        req = urllib.request.Request(
+            PI_HORIZON_BASE,
+            headers={"User-Agent": "PiBarX-Telemetry/1.0", "Accept": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=4) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+                return {
+                    "connected": True,
+                    "network": "Pi Network Mainnet",
+                    "horizon_version": data.get("horizon_version"),
+                    "core_version": data.get("core_version"),
+                    "latest_ledger": data.get("history_latest_ledger"),
+                    "network_passphrase": data.get("network_passphrase", "Pi Network"),
+                    "node_url": PI_HORIZON_BASE
+                }
+    except Exception as e:
+        return {
+            "connected": False,
+            "network": "Pi Network Mainnet",
+            "error": str(e),
+            "latest_ledger": None,
+            "node_url": PI_HORIZON_BASE
+        }
+
+

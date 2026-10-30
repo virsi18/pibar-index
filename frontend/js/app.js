@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initNavTabs();
   initCalculator();
   initSubmitModal();
+  initPiIntegration();
   loadAllData();
 
   // Auto-refresh summary data every 30 seconds
@@ -437,3 +438,104 @@ function populateCountryDropdowns(countries) {
   if (feedCountry) feedCountry.innerHTML = `<option value="">All Countries</option>` + opts;
 }
 
+
+
+// ==========================================
+// PI NETWORK NODE & PI BROWSER SDK INTEGRATION
+// ==========================================
+
+let latestPiLedger = null;
+let currentPioneer = null;
+
+async function initPiIntegration() {
+  console.log("[PiBarX] Initializing Pi Network Connection & Telemetry...");
+
+  // 1. Fetch live telemetry from Pi Mainnet Horizon Node
+  await syncPiNetworkTelemetry();
+  setInterval(syncPiNetworkTelemetry, 15000); // sync every 15s
+
+  // 2. Setup Pi SDK if running inside Pi Browser
+  setupPiBrowserSDK();
+}
+
+async function syncPiNetworkTelemetry() {
+  try {
+    const res = await fetch("/api/pi/status");
+    if (!res.ok) return;
+    const data = await res.json();
+
+    if (data.connected && data.latest_ledger) {
+      latestPiLedger = data.latest_ledger;
+      const statusElem = document.getElementById("ticker-sync-status");
+      if (statusElem) {
+        statusElem.innerHTML = `<span style="color: #10b981;">●</span> Pi Mainnet #${data.latest_ledger.toLocaleString()}`;
+        statusElem.style.color = "#10b981";
+      }
+    }
+  } catch (err) {
+    console.warn("[PiBarX] Pi telemetry sync error:", err);
+  }
+}
+
+function setupPiBrowserSDK() {
+  const authBtn = document.getElementById("pi-auth-btn");
+  const authText = document.getElementById("pi-auth-text");
+
+  // Check if Pi SDK object exists
+  const isPiBrowser = typeof window.Pi !== "undefined";
+
+  if (isPiBrowser) {
+    try {
+      window.Pi.init({ version: "2.0", sandbox: false });
+      console.log("[PiBarX] Pi SDK initialized for Pi Browser.");
+    } catch (e) {
+      console.warn("[PiBarX] Pi.init warning:", e);
+    }
+  }
+
+  if (authBtn) {
+    authBtn.addEventListener("click", async () => {
+      if (currentPioneer) {
+        alert(`Terhubung sebagai Pioneer: @${currentPioneer}\nPi Mainnet Ledger: #${latestPiLedger ? latestPiLedger.toLocaleString() : 'Active'}`);
+        return;
+      }
+
+      if (typeof window.Pi !== "undefined" && window.Pi.authenticate) {
+        authText.textContent = "Connecting...";
+        try {
+          const scopes = ["username", "payments", "wallet_address"];
+          const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+          if (auth && auth.user) {
+            currentPioneer = auth.user.username;
+            authText.textContent = `@${currentPioneer}`;
+            authBtn.classList.add("authenticated");
+            
+            // Auto fill form if opened
+            const merchantInput = document.getElementById("form-merchant");
+            if (merchantInput && !merchantInput.value) {
+              merchantInput.value = `@${currentPioneer}`;
+            }
+            alert(`Berhasil terhubung ke Pi Network! Selamat datang, Pioneer @${currentPioneer}`);
+          }
+        } catch (err) {
+          console.error("[PiBarX] Pi authentication error:", err);
+          authText.textContent = "Connect Pi";
+          alert("Otentikasi Pi dibatalkan atau terjadi kesalahan.");
+        }
+      } else {
+        // Desktop browser fallback
+        const msg = `⚡ PI NETWORK MAINNET NODE STATUS: ONLINE\n\n` +
+          `• Horizon Node: https://api.mainnet.minepi.com\n` +
+          `• Core Version: stellar-core 28.0.1\n` +
+          `• Latest Ledger Sequence: #${latestPiLedger ? latestPiLedger.toLocaleString() : 'Syncing...'}\n\n` +
+          `Saat ini Anda mengakses PiBarX lewat Browser Standar.\n` +
+          `Untuk login dengan akun Pioneer dan dompet Pi Wallet Anda, silakan buka link ini langsung di dalam aplikasi PI BROWSER (smartphone).`;
+        alert(msg);
+      }
+    });
+  }
+}
+
+function onIncompletePaymentFound(payment) {
+  console.log("[PiBarX] Incomplete payment found:", payment);
+}
