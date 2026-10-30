@@ -141,45 +141,45 @@ def _seed_barters(conn):
     now = datetime.now(timezone.utc)
     records = [
         # Indonesia
-        ("Beras Pandan Wangi 10kg", "rice", "ID", "Surabaya", "Toko Berkah Pioneer", 0.50, 185000, "IDR", "c12a849f3e9b1049281a8db39210482910482910492049182938491829304918", "VERIFIED_ONCHAIN", "Transferred during Surabaya offline Pioneer meetup."),
-        ("Kopi Arabika Gayo & Toast", "coffee", "ID", "Bandung", "Ruang Kopi Pioneer", 0.12, 45000, "IDR", "d88b492019482019482019482019482019482019482019482019482019482019", "VERIFIED_ONCHAIN", "QR scan pay at cafe counter."),
-        ("Paket Sembako Bulanan Lengkap", "groceries", "ID", "Jakarta Timur", "Warung Pioneer Nusantara", 2.20, 750000, "IDR", "e771029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Beras, minyak goreng 2L, telur 1kg, gula."),
-        ("Redmi Note 13 8/256GB New", "smartphone", "ID", "Medan", "Pioneer Mobile Store", 7.80, 2799000, "IDR", "f661029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Sealed unit, barter confirmed on-chain."),
-        ("Ganti Oli Mesin & Cuci Motor", "services", "ID", "Yogyakarta", "Bengkel Mitra Pioneer", 0.35, 120000, "IDR", "a551029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Motul 10W-40 + wash."),
-        ("Bensin Pertamax 10 Liter", "fuel", "ID", "Semarang", "Kios BBM Pioneer", 0.38, 137000, "IDR", "b441029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Direct voucher exchange."),
-        ("Honda BeAT eSP 2022 (Bekas)", "moto", "ID", "Denpasar", "Pioneer Moto Barter", 42.0, 14500000, "IDR", "c331029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Surat lengkap BPKB & STNK."),
+        ("Beras Pandan Wangi 10kg", "rice", "ID", "Surabaya", "Toko Berkah Pioneer", 0.50, 185000, "IDR", "7ea736d3be5a70f56a87b5934e6d3c137483b2a72ec2f01b242a4e919dec02f0", "VERIFIED_ONCHAIN", "Transferred during Surabaya offline Pioneer meetup."),
+        ("Kopi Arabika Gayo & Toast", "coffee", "ID", "Bandung", "Ruang Kopi Pioneer", 0.12, 45000, "IDR", "7a141aa156cb6cea601c908c1d5e63e516e15856c6ea60bbae2741f4f503cbdb", "VERIFIED_ONCHAIN", "QR scan pay at cafe counter."),
+        ("Paket Sembako Bulanan Lengkap", "groceries", "ID", "Jakarta Timur", "Warung Pioneer Nusantara", 2.20, 750000, "IDR", "95a9ae9bc393b0a53f9d8dd5dd679d3154bd0b2e2c3c4d471f354424a03bdb2c", "VERIFIED_ONCHAIN", "Beras, minyak goreng 2L, telur 1kg, gula."),
+        ("Redmi Note 13 8/256GB New", "smartphone", "ID", "Medan", "Pioneer Mobile Store", 7.80, 2799000, "IDR", "0ffaf7bb297dc50eec58f183fcb0cf13bbafb5200490f595e1351b7888d6d345", "VERIFIED_ONCHAIN", "Sealed unit, barter confirmed on-chain."),
+        ("Ganti Oli Mesin & Cuci Motor", "services", "ID", "Yogyakarta", "Bengkel Mitra Pioneer", 0.35, 120000, "IDR", "cabaa86a50fb4d3b63c75e99a481d50583bac9deb8c91ec4324ab35d45511630", "VERIFIED_ONCHAIN", "Motul 10W-40 + wash."),
+        ("Bensin Pertamax 10 Liter", "fuel", "ID", "Semarang", "Kios BBM Pioneer", 0.38, 137000, "IDR", "d3536c9e5dcece4b6fa2944a8de6fdaac0ee7e62649eb615241c783f60ec10eb", "VERIFIED_ONCHAIN", "Direct voucher exchange."),
+        ("Honda BeAT eSP 2022 (Bekas)", "moto", "ID", "Denpasar", "Pioneer Moto Barter", 42.0, 14500000, "IDR", "2e547de4d61137bb34e0d6ecd479204e8432349ceeb3419845aff4a116b3802c", "VERIFIED_ONCHAIN", "Surat lengkap BPKB & STNK."),
 
         # Vietnam
-        ("Gao ST25 Rice 10kg", "rice", "VN", "Hanoi", "ST25 Pioneer Mart", 0.45, 320000, "VND", "d221029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "World best rice variety barter."),
-        ("Pho Bo Dac Biet & Ca Phe", "coffee", "VN", "Ho Chi Minh City", "Pho Pioneer 88", 0.15, 95000, "VND", "e111029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Morning breakfast combo."),
-        ("Samsung Galaxy A54 5G", "smartphone", "VN", "Da Nang", "Digital Pi Shop", 8.20, 6800000, "VND", "f001029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Local electronics merchant."),
-        ("Xang A95 Fuel 10 Liters", "fuel", "VN", "Hai Phong", "Pioneer Gas Station", 0.40, 240000, "VND", "a991029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Motorbike fill-up voucher."),
-        ("Cat Toc Nam & Massage Mat", "services", "VN", "Can Tho", "Pioneer Barber Club", 0.20, 150000, "VND", "b881029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "VIP haircut package."),
+        ("Gao ST25 Rice 10kg", "rice", "VN", "Hanoi", "ST25 Pioneer Mart", 0.45, 320000, "VND", "71b4b54cc927214614d73f8a9c95cdd7c9e5038a888e704edd93fb7b5c900498", "VERIFIED_ONCHAIN", "World best rice variety barter."),
+        ("Pho Bo Dac Biet & Ca Phe", "coffee", "VN", "Ho Chi Minh City", "Pho Pioneer 88", 0.15, 95000, "VND", "a70ab9338f370895ba880430bcfbf28a63e017e460c4ccdf3cb4adac26791130", "VERIFIED_ONCHAIN", "Morning breakfast combo."),
+        ("Samsung Galaxy A54 5G", "smartphone", "VN", "Da Nang", "Digital Pi Shop", 8.20, 6800000, "VND", "4944fb7c968425f72553d641b4ad47e48c20c9b98b27c8795d877a11528f285d", "VERIFIED_ONCHAIN", "Local electronics merchant."),
+        ("Xang A95 Fuel 10 Liters", "fuel", "VN", "Hai Phong", "Pioneer Gas Station", 0.40, 240000, "VND", "5fe34a1af7098f14e2e8c0b54ceb33cbb9f3d4c862785b9fed9a16384ab4ea11", "VERIFIED_ONCHAIN", "Motorbike fill-up voucher."),
+        ("Cat Toc Nam & Massage Mat", "services", "VN", "Can Tho", "Pioneer Barber Club", 0.20, 150000, "VND", "7d776f9340462c0d8827fcd8cfcb9bf9d17e8edf7bdf31924741e61220cfb9c3", "VERIFIED_ONCHAIN", "VIP haircut package."),
 
         # Nigeria
-        ("Bag of Royal Stallion Rice 10kg", "rice", "NG", "Lagos", "Pioneer Food Depot", 0.60, 19500, "NGN", "c771029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Staple food grain barter."),
-        ("Weekly Food Stuff Basket", "groceries", "NG", "Abuja", "Grace Pioneer Enterprise", 1.80, 52000, "NGN", "d661029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Garri, yam, plantain, palm oil."),
-        ("Tecno Camon 30 256GB", "smartphone", "NG", "Ibadan", "Alaba Pi Merchant", 7.50, 230000, "NGN", "e551029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Brand new sealed in box."),
-        ("PMS Petrol 15 Litres", "fuel", "NG", "Port Harcourt", "Rivers Pioneer Fuel", 0.50, 13500, "NGN", "f441029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Direct generator fuel barter."),
+        ("Bag of Royal Stallion Rice 10kg", "rice", "NG", "Lagos", "Pioneer Food Depot", 0.60, 19500, "NGN", "f800308cc879b3f586495ba099370587b1918eefa8a32261105ca20887060e27", "VERIFIED_ONCHAIN", "Staple food grain barter."),
+        ("Weekly Food Stuff Basket", "groceries", "NG", "Abuja", "Grace Pioneer Enterprise", 1.80, 52000, "NGN", "5eecb8deb18ece59130ae0b208585c566911939f79f852c637c02fe16ce90e55", "VERIFIED_ONCHAIN", "Garri, yam, plantain, palm oil."),
+        ("Tecno Camon 30 256GB", "smartphone", "NG", "Ibadan", "Alaba Pi Merchant", 7.50, 230000, "NGN", "4784b9fe239704bbe5d4cfc34d0e4f589ee808b8ba1cef30acb0577d20265ce6", "VERIFIED_ONCHAIN", "Brand new sealed in box."),
+        ("PMS Petrol 15 Litres", "fuel", "NG", "Port Harcourt", "Rivers Pioneer Fuel", 0.50, 13500, "NGN", "afe547aee5f45035bd58ba0b73b95dc94921facf86c34e866d1ac926b2ef0275", "VERIFIED_ONCHAIN", "Direct generator fuel barter."),
 
         # South Korea
-        ("Cheongwon Organic Rice 10kg", "rice", "KR", "Seoul", "Pioneer Eco Food", 0.95, 42000, "KRW", "a331029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Premium Korean rice."),
-        ("Americano & Basque Cheesecake", "coffee", "KR", "Busan", "Cafe Pi Marine", 0.30, 13000, "KRW", "b221029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Specialty coffee shop."),
-        ("Galaxy Buds FE (White)", "smartphone", "KR", "Incheon", "Smart Pi Korea", 2.80, 99000, "KRW", "c111029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Brand new earphone."),
+        ("Cheongwon Organic Rice 10kg", "rice", "KR", "Seoul", "Pioneer Eco Food", 0.95, 42000, "KRW", "cd156ed106cdc57bdb062fa5694d9fe8ec6274875ceefe850a4a512736b7fd06", "VERIFIED_ONCHAIN", "Premium Korean rice."),
+        ("Americano & Basque Cheesecake", "coffee", "KR", "Busan", "Cafe Pi Marine", 0.30, 13000, "KRW", "8c02bfa60a73a08424da4a69b97d85c28131bcf306cd1b00bb02936e7cad1d91", "VERIFIED_ONCHAIN", "Specialty coffee shop."),
+        ("Galaxy Buds FE (White)", "smartphone", "KR", "Incheon", "Smart Pi Korea", 2.80, 99000, "KRW", "7f93c3cbbc1440bfc435cb683c9bdfd9783c906de00a94a1cb8d523c260c7c38", "VERIFIED_ONCHAIN", "Brand new earphone."),
 
         # China
-        ("Wuchang Rice 10kg Vacuum Pack", "rice", "CN", "Guangzhou", "Lingnan Pioneer Food", 0.55, 110, "CNY", "d001029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Northeastern Chinese grain."),
-        ("Pu'er Aged Tea Cake 357g", "coffee", "CN", "Kunming", "Yunnan Pi Tea Master", 1.20, 240, "CNY", "e991029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Raw Pu'er 2018 vintage."),
-        ("Xiaomi Redmi 13C 5G", "smartphone", "CN", "Shenzhen", "Huaqiangbei Pi Store", 4.20, 799, "CNY", "f881029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Local electronics hub barter."),
+        ("Wuchang Rice 10kg Vacuum Pack", "rice", "CN", "Guangzhou", "Lingnan Pioneer Food", 0.55, 110, "CNY", "398a4bd1f43958eb7903f362c9e7c5b34d9b1e3bf8e1247a060a0d189c5fe01c", "VERIFIED_ONCHAIN", "Northeastern Chinese grain."),
+        ("Pu'er Aged Tea Cake 357g", "coffee", "CN", "Kunming", "Yunnan Pi Tea Master", 1.20, 240, "CNY", "c5fcc9ee54f3d425e8e398273cab16400b491e7a9947223ee3668f6bf04ac393", "VERIFIED_ONCHAIN", "Raw Pu'er 2018 vintage."),
+        ("Xiaomi Redmi 13C 5G", "smartphone", "CN", "Shenzhen", "Huaqiangbei Pi Store", 4.20, 799, "CNY", "08ce776012132a1ebbb0fb091c8bebf5629c144afa5551a607c5880d3c687554", "VERIFIED_ONCHAIN", "Local electronics hub barter."),
 
         # Philippines
-        ("Sinandomeng Rice 10kg", "rice", "PH", "Manila", "Pioneer Palengke Mart", 0.48, 560, "PHP", "a771029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Daily grain ration."),
-        ("Brewed Barako Coffee & Pastry", "coffee", "PH", "Cebu", "Kapihan Pi Station", 0.14, 160, "PHP", "b661029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Heritage Batangas beans."),
-        ("Realme C53 128GB Champion", "smartphone", "PH", "Davao", "Mindanao Pi Gadgets", 5.20, 5999, "PHP", "c551029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Official warranty unit."),
+        ("Sinandomeng Rice 10kg", "rice", "PH", "Manila", "Pioneer Palengke Mart", 0.48, 560, "PHP", "21e5201c79bc62472b985ca033d574b4f587897f51466df9241aa56128b73a16", "VERIFIED_ONCHAIN", "Daily grain ration."),
+        ("Brewed Barako Coffee & Pastry", "coffee", "PH", "Cebu", "Kapihan Pi Station", 0.14, 160, "PHP", "04b08a53807a1e368b0e7e638eb17fc2d6a0077b007849e1efc9680ca7f88f85", "VERIFIED_ONCHAIN", "Heritage Batangas beans."),
+        ("Realme C53 128GB Champion", "smartphone", "PH", "Davao", "Mindanao Pi Gadgets", 5.20, 5999, "PHP", "6a6b35ccce59c66be008209b12c533c7235cdf3b5a2d98945fcc1a9f41a80af4", "VERIFIED_ONCHAIN", "Official warranty unit."),
 
         # United States
-        ("Whole Foods Organic Basket", "groceries", "US", "Austin", "Lone Star Pioneer Co-op", 2.10, 58.0, "USD", "d441029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Milk, sourdough, eggs, produce."),
-        ("Espresso Flight & Bag of Beans", "coffee", "US", "Seattle", "Cascade Pioneer Roasters", 0.70, 22.0, "USD", "e331029482019482019482019482019482019482019482019482019482019482", "VERIFIED_ONCHAIN", "Pacific Northwest micro-lot.")
+        ("Whole Foods Organic Basket", "groceries", "US", "Austin", "Lone Star Pioneer Co-op", 2.10, 58.0, "USD", "174fb82e8aec4951f8e3e3b5e884783b03531b5772271bb374400e9f520cbf87", "VERIFIED_ONCHAIN", "Milk, sourdough, eggs, produce."),
+        ("Espresso Flight & Bag of Beans", "coffee", "US", "Seattle", "Cascade Pioneer Roasters", 0.70, 22.0, "USD", "fdc0b3e328d905ab9a6c628427a5a6abec16730b810a9f1c47cfdfe65ae2e639", "VERIFIED_ONCHAIN", "Pacific Northwest micro-lot.")
     ]
 
     insert_rows = []
