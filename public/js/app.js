@@ -41,9 +41,49 @@ function scrollToSection(sectionId) {
   });
   const navMatch = document.querySelector(`.nav-link-item[onclick*="${sectionId}"]`);
   if (navMatch) navMatch.classList.add("active");
+
+  // Dismiss mobile drawer if open
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar-drawer") || document.querySelector(".sidebar");
+    const backdrop = document.getElementById("sidebar-backdrop");
+    if (sidebar) sidebar.classList.remove("mobile-open");
+    if (backdrop) backdrop.classList.remove("mobile-open");
+    document.body.style.overflow = "";
+  }
 }
 
 function initSidebarAndTabs() {
+  // Mobile Burger Bar & Drawer Logic
+  const burgerBtn = document.getElementById("btn-burger-menu");
+  const sidebar = document.getElementById("sidebar-drawer") || document.querySelector(".sidebar");
+  const closeBtn = document.getElementById("btn-close-sidebar");
+  const backdrop = document.getElementById("sidebar-backdrop");
+
+  function openSidebar() {
+    if (sidebar) sidebar.classList.add("mobile-open");
+    if (backdrop) backdrop.classList.add("mobile-open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeSidebar() {
+    if (sidebar) sidebar.classList.remove("mobile-open");
+    if (backdrop) backdrop.classList.remove("mobile-open");
+    document.body.style.overflow = "";
+  }
+
+  if (burgerBtn) burgerBtn.addEventListener("click", openSidebar);
+  if (closeBtn) closeBtn.addEventListener("click", closeSidebar);
+  if (backdrop) backdrop.addEventListener("click", closeSidebar);
+
+  // Auto-close drawer on mobile when any navigation item is clicked
+  document.querySelectorAll(".nav-link-item, .btn-sidebar-submit").forEach(el => {
+    el.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+    });
+  });
+
   document.querySelectorAll(".header-tab-pill").forEach(pill => {
     pill.addEventListener("click", () => {
       document.querySelectorAll(".header-tab-pill").forEach(p => p.classList.remove("active"));

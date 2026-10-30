@@ -14,7 +14,7 @@
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <!-- Obsidian Parity Terminal Stylesheet -->
-  <link rel="stylesheet" href="/static/css/terminal.css?v=2.2.0">
+  <link rel="stylesheet" href="/static/css/terminal.css?v=2.5.0">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>π</text></svg>">
 </head>
 <body>
@@ -24,15 +24,19 @@
     <!-- ====================================================================== -->
     <!-- LEFT TERMINAL SIDEBAR                                                  -->
     <!-- ====================================================================== -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar-drawer">
       <div>
         <!-- Brand Header -->
         <div class="brand-section">
+          <div style="display: flex; align-items: center; gap: 8px;">
           <div class="brand-logo-icon">π</div>
           <div>
             <div class="brand-title">PARITY TERMINAL</div>
             <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">PiBarX Macro Engine</div>
           </div>
+        </div>
+
+          <button class="sidebar-close-btn" id="btn-close-sidebar" aria-label="Close menu">&times;</button>
         </div>
 
         <!-- Mainnet Status Cluster -->
@@ -90,6 +94,9 @@
       </div>
     </aside>
 
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
     <!-- ====================================================================== -->
     <!-- MAIN VIEWPORT                                                          -->
     <!-- ====================================================================== -->
@@ -97,6 +104,18 @@
 
       <!-- Top Header Telemetry Bar -->
       <header class="top-header">
+        <!-- Mobile Hamburger Button & Brand -->
+        <div class="mobile-brand-group">
+          <button class="burger-btn" id="btn-burger-menu" aria-label="Toggle navigation menu" title="Open Navigation">
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+          </button>
+          <div class="mobile-brand-title">
+            <span class="mobile-logo">π</span>
+            <span>PARITY</span>
+          </div>
+        </div>
         <div class="header-search">
           <span class="header-search-icon">🔍</span>
           <input type="text" id="global-search-input" placeholder="Filter country, commodity or TxID...">
@@ -471,6 +490,6 @@
   </div>
 
   <!-- Core JavaScript Application Logic -->
-  <script src="/static/js/app.js?v=2.3.0"></script>
+  <script src="/static/js/app.js?v=2.5.0"></script>
 </body>
 </html>
