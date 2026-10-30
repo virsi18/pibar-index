@@ -4,7 +4,6 @@ Launcher Script
 """
 
 import sys
-import webbrowser
 import uvicorn
 
 def main():
@@ -21,9 +20,8 @@ def main():
     print(f"  > Stitch AI Design System: Obsidian Parity Terminal")
     print("=" * 68)
 
-    # Launch server
-    uvicorn.run("backend.main:app", host=host, port=port, reload=False)
+    # Launch server with reload=True so changes hot-reload automatically
+    uvicorn.run("backend.main:app", host=host, port=port, reload=True)
 
 if __name__ == "__main__":
     main()
-
