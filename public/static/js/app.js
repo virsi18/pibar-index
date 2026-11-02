@@ -7,9 +7,15 @@ let allBarters = [];
 let allCommodities = [];
 let allCountries = [];
 let currentFeedMode = "barters";
-let latestPiLedger = 29486050;
+let latestPiLedger = null;
 let currentPioneer = null;
 let activeRegionFilter = "ALL";
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+  })[char]);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("[PiBarX] Obsidian Parity Terminal Engine Initialized.");
@@ -141,17 +147,19 @@ async function loadSummary() {
     if (!res.ok) return;
     const data = await res.json();
 
-    const price = Number(data.global_median_pi_usd || 24.80).toFixed(2);
-    document.getElementById("kpi-price").textContent = `1 π = $${price}`;
-    document.getElementById("kpi-delta-24h").textContent = `+${data.change_24h_pct || 4.12}% 24h`;
-    document.getElementById("kpi-vol-pi").textContent = `${Number(data.total_volume_24h_pi || 142500).toLocaleString()} π`;
-    document.getElementById("kpi-vol-usd").textContent = `≈ $${(Number(data.total_volume_24h_usd || 3530000) / 1000000).toFixed(2)}M USD`;
-    document.getElementById("kpi-trades-count").textContent = `${data.total_barters_count || 27}`;
-    document.getElementById("kpi-hubs").textContent = `${data.active_countries_count || 8} Sovereign Hubs`;
-    
-    if (data.last_block_sync) {
-      document.getElementById("header-block-sync").textContent = data.last_block_sync;
-    }
+    const priceEl = document.getElementById("kpi-price");
+    const deltaEl = document.getElementById("kpi-delta-24h");
+    const volPiEl = document.getElementById("kpi-vol-pi");
+    const volUsdEl = document.getElementById("kpi-vol-usd");
+    const tradesEl = document.getElementById("kpi-trades-count");
+    const hubsEl = document.getElementById("kpi-hubs");
+    if (priceEl) priceEl.textContent = data.global_median_pi_usd == null ? "No verified data" : `1 π = $${Number(data.global_median_pi_usd).toFixed(4)}`;
+    if (deltaEl) deltaEl.textContent = data.change_24h_pct == null ? "— 24h" : `${Number(data.change_24h_pct).toFixed(2)}% 24h`;
+    if (volPiEl) volPiEl.textContent = `${Number(data.total_volume_24h_pi || 0).toLocaleString()} π`;
+    if (volUsdEl) volUsdEl.textContent = `≈ $${Number(data.total_volume_24h_usd || 0).toLocaleString()} USD`;
+    if (tradesEl) tradesEl.textContent = Number(data.total_barters_count || 0).toLocaleString();
+    if (hubsEl) hubsEl.textContent = `${Number(data.active_countries_count || 0)} active countries`;
+    if (data.last_block_sync && document.getElementById("header-block-sync")) document.getElementById("header-block-sync").textContent = data.last_block_sync;
   } catch (err) {
     console.warn("[PiBarX] Summary error:", err);
   }
@@ -173,32 +181,12 @@ function renderCommodities(commodities) {
   const container = document.getElementById("commodity-cards-container");
   if (!container || !commodities) return;
 
-  const defaultSpreadMap = {
-    "rice": "0.62 - 0.68",
-    "coffee": "0.79 - 0.85",
-    "fuel": "2.40 - 2.52",
-    "smartphone": "14.0 - 15.2",
-    "groceries": "3.95 - 4.25",
-    "moto": "40.0 - 44.5",
-    "services": "0.30 - 0.40"
-  };
-
-  const tradeCountMap = {
-    "rice": "2,420 trades",
-    "coffee": "1,890 trades",
-    "fuel": "912 trades",
-    "smartphone": "418 trades",
-    "groceries": "3,410 trades"
-  };
-
   container.innerHTML = commodities.slice(0, 5).map(c => {
-    const spread = defaultSpreadMap[c.id] || "±5% Corridor";
-    const trades = tradeCountMap[c.id] || `${c.sample_trades_count || c.trades_count || 120} trades`;
-    const deltaVal = Number(c.change_24h_pct || 0);
-    const isUp = deltaVal >= 0;
-    const deltaClass = isUp ? "up" : "down";
-    const deltaText = isUp ? `+${deltaVal}%` : `${deltaVal}%`;
-    const piPrice = Number(c.median_pi_price || c.median_pi || ((c.benchmark_usd || 10) / 24.8)).toFixed(2);
+    const trades = `${Number(c.sample_trades_count || 0)} verified trades`;
+    const deltaVal = c.change_24h_pct;
+    const deltaClass = deltaVal == null ? "" : (deltaVal >= 0 ? "up" : "down");
+    const deltaText = deltaVal == null ? "No trend data" : `${deltaVal >= 0 ? "+" : ""}${Number(deltaVal).toFixed(2)}%`;
+    const piPrice = c.median_pi_price == null ? "—" : Number(c.median_pi_price).toFixed(4);
     const benchmark = Number(c.benchmark_usd || 0).toFixed(2);
 
     return `
@@ -209,11 +197,11 @@ function renderCommodities(commodities) {
         </div>
         <div class="comm-name-row">${c.name}</div>
         <div class="comm-price-row">
-          <span class="comm-price-pi">${piPrice} π</span>
+          <span class="comm-price-pi">${piPrice === "—" ? "No Pi sample" : `Median paid: ${piPrice} π`}</span>
           <span class="comm-delta ${deltaClass}">${deltaText} 7d</span>
         </div>
-        <div class="comm-fiat-eq">$${benchmark} USD Eq. (${c.unit || 'Unit'})</div>
-        <div class="comm-spread">Spread: ${spread}</div>
+        <div class="comm-fiat-eq">Reference ≈ $${benchmark} USD (${c.unit || 'Unit'})</div>
+        <div class="comm-spread">Reference basket value only — not a live Pi quote</div>
       </div>
     `;
   }).join("");
@@ -236,12 +224,8 @@ function renderCountryMatrix(countries) {
   if (!tbody || !countries) return;
 
   tbody.innerHTML = countries.map(c => {
-    const ratio = c.purchasing_power_ratio || 1.0;
-    const scoreVal = Math.min(99, Math.round(92 + (ratio * 3)));
-    const medianUsd = Number(c.median_barter_pi_usd || 24.80).toFixed(2);
-    const localRate = c.exchange_rate_usd || 1.0;
-    const localFiatVal = c.local_median_pi_fiat || Math.round(Number(medianUsd) / Math.max(Number(localRate), 0.000001));
-    const totalTrades = (c.total_barters || 10) * 1150;
+    const medianUsd = c.median_barter_pi_usd == null ? "—" : Number(c.median_barter_pi_usd).toFixed(4);
+    const totalTrades = Number(c.total_barters || 0);
     
     return `
       <tr>
@@ -253,27 +237,27 @@ function renderCountryMatrix(countries) {
           </div>
         </td>
         <td class="font-mono">
-          <span style="color: #fff; font-weight: 600;">$${medianUsd} / π</span>
-          <div style="font-size: 10px; color: var(--text-dim);">${c.currency_symbol || '$'} ${Number(localFiatVal).toLocaleString()}</div>
+          <span style="color: #fff; font-weight: 600;">${medianUsd === "—" ? "No verified rate" : `$${medianUsd} / π`}</span>
+          <div style="font-size: 10px; color: var(--text-dim);">${c.currency_code} · configured reference FX</div>
         </td>
         <td class="font-mono" style="color: var(--basket-amber-light);">
-          Gap: 99.99% <span style="font-size: 10px; color: var(--text-muted);">vs $314k GCV</span>
+          ${c.purchasing_power_ratio == null ? "PPP unavailable" : `PPP ratio: ${Number(c.purchasing_power_ratio).toFixed(3)}`}
         </td>
         <td>
           <span style="background: var(--surface-input); border: 1px solid var(--border-subtle); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: var(--text-dim);">
-            ${c.most_popular_commodity || "General Goods"}
+            ${c.most_popular_commodity || "No sample"}
           </span>
         </td>
         <td class="font-mono" style="color: var(--pi-purple-light); font-weight: 600;">
-          ${Number(totalTrades).toLocaleString()} π
+          ${totalTrades.toLocaleString()} trades
         </td>
-        <td class="font-mono" style="color: var(--yield-emerald-light);">98.8%</td>
+        <td class="font-mono" style="color: var(--yield-emerald-light);">${totalTrades ? "Verified" : "Unrated"}</td>
         <td>
           <div class="score-bar-wrap">
             <div class="score-bar-bg">
-              <div class="score-bar-fill" style="width: ${scoreVal}%;"></div>
+              <div class="score-bar-fill" style="width: 0%;"></div>
             </div>
-            <span class="score-val">${scoreVal}/100</span>
+            <span class="score-val">${totalTrades ? "Sample available" : "No sample"}</span>
           </div>
         </td>
       </tr>
@@ -311,6 +295,8 @@ async function loadBarters() {
     const res = await fetch("/api/barters?limit=28");
     if (!res.ok) return;
     allBarters = await res.json();
+    const countTab = document.getElementById("tab-btn-barters");
+    if (countTab) countTab.textContent = `🛒 Verified Barters (${allBarters.length})`;
     if (currentFeedMode === "barters") {
       renderBarterTable(allBarters);
     }
@@ -331,7 +317,7 @@ function renderBarterTable(barters) {
   tbody.innerHTML = barters.map(b => {
     const txShort = b.tx_hash && b.tx_hash.length === 64
       ? `${b.tx_hash.substring(0, 6)}...${b.tx_hash.substring(58)}`
-      : "P2P Proof";
+      : "Missing TxID";
 
     const txLink = b.tx_hash && b.tx_hash.length === 64
       ? `https://api.mainnet.minepi.com/transactions/${b.tx_hash}`
@@ -343,29 +329,29 @@ function renderBarterTable(barters) {
     return `
       <tr>
         <td class="font-mono">
-          <a href="${txLink}" target="_blank" style="color: var(--pi-purple-light); text-decoration: none; font-size: 11px;">
+          <a href="${txLink}" target="_blank" rel="noopener noreferrer" style="color: var(--pi-purple-light); text-decoration: none; font-size: 11px;">
             ${txShort} ↗
           </a>
           <div style="font-size: 9px; color: var(--text-muted);">${(b.timestamp || "").substring(5, 16)}</div>
         </td>
         <td>
-          <div style="font-weight: 600; color: #fff; font-size: 11px;">${b.merchant_name}</div>
-          <div style="font-size: 10px; color: var(--text-dim);">${b.city}, ${b.country_code}</div>
+          <div style="font-weight: 600; color: #fff; font-size: 11px;">${escapeHtml(b.merchant_name)}</div>
+          <div style="font-size: 10px; color: var(--text-dim);">${escapeHtml(b.city)}, ${escapeHtml(b.country_code)}</div>
         </td>
         <td>
-          <div style="font-size: 11px; color: #fff;">${b.item_name}</div>
-          <div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">${b.commodity_id}</div>
+          <div style="font-size: 11px; color: #fff;">${escapeHtml(b.item_name)}</div>
+          <div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;">${escapeHtml(b.commodity_id)}</div>
         </td>
         <td class="font-mono" style="font-weight: 700; color: var(--pi-purple-light); font-size: 13px;">
           ${b.pi_amount} π
         </td>
         <td class="font-mono" style="font-size: 11px;">
           $${fiatUsd}
-          <div style="font-size: 9px; color: var(--text-muted);">${b.fiat_currency} ${fiatVal}</div>
+          <div style="font-size: 9px; color: var(--text-muted);">${escapeHtml(b.fiat_currency)} ${fiatVal}</div>
         </td>
         <td>
-          <a href="${txLink}" target="_blank" class="btn-invoice-proof" title="Verified Proof Receipt">
-            <span>●</span> ON-PROOF
+          <a href="${txLink}" target="_blank" rel="noopener noreferrer" class="btn-invoice-proof" title="Verified Proof Receipt">
+            <span>●</span> VERIFIED ON-CHAIN
           </a>
         </td>
       </tr>
@@ -426,26 +412,28 @@ window.switchFeedMode = async function(mode) {
         const timeStr = t.created_at ? t.created_at.replace("T", " ").replace("Z", "") : "Now";
         const fromShort = t.from_address ? `${t.from_address.substring(0, 8)}...${t.from_address.substring(t.from_address.length - 6)}` : "Unknown";
         const toShort = t.to_address ? `${t.to_address.substring(0, 8)}...${t.to_address.substring(t.to_address.length - 6)}` : "Unknown";
-        const txShort = t.tx_hash ? `${t.tx_hash.substring(0, 8)}...${t.tx_hash.substring(56)}` : "Tx";
+        const validTxHash = /^[a-f0-9]{64}$/i.test(t.tx_hash || "");
+        const txShort = validTxHash ? `${t.tx_hash.substring(0, 8)}...${t.tx_hash.substring(56)}` : "Tx";
+        const txHref = validTxHash ? `https://api.mainnet.minepi.com/transactions/${t.tx_hash}` : "#";
 
         return `
           <tr>
-            <td class="font-mono" style="font-size: 10px; color: var(--text-muted);">${timeStr}</td>
+            <td class="font-mono" style="font-size: 10px; color: var(--text-muted);">${escapeHtml(timeStr)}</td>
             <td>
-              <div class="font-mono" style="font-size: 11px; color: #fff;" title="${t.from_address}">${fromShort}</div>
+              <div class="font-mono" style="font-size: 11px; color: #fff;" title="${escapeHtml(t.from_address)}">${escapeHtml(fromShort)}</div>
             </td>
             <td>
-              <div class="font-mono" style="font-size: 11px; color: var(--text-dim);" title="${t.to_address}">${toShort}</div>
+              <div class="font-mono" style="font-size: 11px; color: var(--text-dim);" title="${escapeHtml(t.to_address)}">${escapeHtml(toShort)}</div>
             </td>
             <td>
               <span style="font-size: 9px; font-weight: 700; color: #a5b4fc; background: rgba(99,102,241,0.2); padding: 2px 5px; border-radius: 3px;">PI NATIVE</span>
             </td>
             <td class="font-mono" style="font-weight: 700; color: var(--pi-purple-light); font-size: 13px;">
-              ${Number(t.amount_pi || 0).toFixed(2)} π
+              ${Number(t.amount_pi || 0).toFixed(7)} π
             </td>
             <td>
-              <a href="https://api.mainnet.minepi.com/transactions/${t.tx_hash}" target="_blank" class="btn-invoice-proof" style="color: var(--yield-emerald-light);">
-                <span>●</span> ${txShort} ↗
+              <a href="${txHref}" target="_blank" rel="noopener noreferrer" class="btn-invoice-proof" style="color: var(--yield-emerald-light);">
+                <span>●</span> ${escapeHtml(txShort)} ↗
               </a>
             </td>
           </tr>
@@ -484,13 +472,18 @@ async function runCalculator() {
     const res = await fetch(`/api/calculator?fiat_amount=${encodeURIComponent(val)}&fiat_currency=${encodeURIComponent(curr)}`);
     const data = await res.json();
 
+    if (data && data.available === false) {
+      if (resPi) resPi.textContent = "Awaiting verified data";
+      if (resCorridor) resCorridor.textContent = data.reason || "Calculator unavailable until verified barter data exists.";
+      return;
+    }
     if (data && data.recommended_pi_range) {
       const fairPi = data.recommended_pi_range.median_fair_pi;
       const consPi = data.recommended_pi_range.conservative_pi;
       const optPi = data.recommended_pi_range.optimistic_pi;
 
       if (resPi) resPi.textContent = `${fairPi} π`;
-      if (resCorridor) resCorridor.textContent = `±3.8% Spread Corridor: ${optPi}P - ${consPi}P (Benchmark: $${data.implied_rate_usd}/π)`;
+      if (resCorridor) resCorridor.textContent = `Indicative ±10% band: ${optPi} π - ${consPi} π (sample median: $${data.implied_rate_usd}/π)`;
     }
   } catch (err) {
     console.warn("[PiBarX] Calc error:", err);
@@ -576,16 +569,21 @@ async function syncPiNetworkTelemetry() {
   } catch (e) {}
 }
 
-window.checkPiNodeDetails = function() {
-  const msg = `⚡ PI NETWORK MAINNET NODE STATUS\n\n` +
-    `• Network: Pi Network Mainnet\n` +
-    `• Horizon Node: https://api.mainnet.minepi.com\n` +
-    `• Stellar Core Engine: 28.0.1\n` +
-    `• Latest Confirmed Ledger: #${latestPiLedger.toLocaleString()}\n` +
-    `• Latency: 14ms (Optimal)\n` +
-    `• Consensus State: Cryptographic SCP Enclosed\n\n` +
-    `Node connection is LIVE and synchronized.`;
-  alert(msg);
+window.checkPiNodeDetails = async function() {
+  try {
+    const response = await fetch("/api/pi/status");
+    const data = await response.json();
+    const msg = `PI NETWORK MAINNET NODE STATUS\n\n` +
+      `• Network: ${data.network || "Pi Network Mainnet"}\n` +
+      `• Horizon: ${data.connected ? "Connected" : "Unavailable"}\n` +
+      `• Core version: ${data.core_version || "Not reported"}\n` +
+      `• Latest ledger: ${data.latest_ledger ? `#${Number(data.latest_ledger).toLocaleString()}` : "Not available"}\n` +
+      `• Endpoint: https://api.mainnet.minepi.com\n\n` +
+      `${data.connected ? "Live Horizon response received." : "Could not confirm node connectivity."}`;
+    alert(msg);
+  } catch (error) {
+    alert("Pi Horizon status unavailable. Please try again later.");
+  }
 };
 
 // ==========================================
@@ -621,7 +619,8 @@ function initSubmitModal() {
         pi_amount: parseFloat(document.getElementById("form-pi-amount").value),
         fiat_value: parseFloat(document.getElementById("form-fiat-value").value),
         fiat_currency: "USD",
-        tx_hash: document.getElementById("form-tx-hash").value.trim() || null,
+        tx_hash: document.getElementById("form-tx-hash").value.trim(),
+        recipient_address: document.getElementById("form-recipient-address").value.trim().toUpperCase(),
         notes: document.getElementById("form-notes").value
       };
 
@@ -643,7 +642,8 @@ function initSubmitModal() {
             loadAllData();
           }, 1200);
         } else {
-          statusEl.textContent = resp.message || "Error submitting barter.";
+          const detail = resp.detail;
+          statusEl.textContent = (typeof detail === "string" ? detail : (detail && detail.message)) || resp.message || "Submission rejected. Check TxID and Pi payment amount.";
           statusEl.style.color = "var(--danger-crimson)";
         }
       } catch (err) {

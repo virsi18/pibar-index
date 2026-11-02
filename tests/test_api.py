@@ -1,131 +1,87 @@
-"""
-PiBarX - Comprehensive Test Suite
-Tests Database, Analytics Engine, Calculator, and API endpoints
-"""
-
-import unittest
-import sys
+"""Integrity-focused tests; no test assumes fabricated market activity."""
+import os, sys, tempfile, unittest
 from pathlib import Path
 
-# Add project root to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
+TEST_DB = tempfile.mktemp(prefix="pibarx-test-", suffix=".db")
+os.environ["PIBARX_DB_PATH"] = TEST_DB
+PROJECT_ROOT=Path(__file__).resolve().parent.parent
+sys.path.insert(0,str(PROJECT_ROOT))
 from backend.database import init_db, get_db, insert_barter
-from backend.analytics import (
-    get_summary_metrics,
-    get_commodity_indices,
-    get_country_parities,
-    calculate_barter_fair_price
-)
+from backend.analytics import get_summary_metrics, get_commodity_indices, get_country_parities, calculate_barter_fair_price
 from backend.blockchain import verify_tx_hash
-
+from unittest.mock import patch
 
 class TestPiBarX(unittest.TestCase):
-
     @classmethod
-    def setUpClass(cls):
-        init_db()
+    def setUpClass(cls): init_db()
 
-    def test_01_database_tables_exist(self):
-        """Verify all tables and seed records are created."""
-        conn = get_db()
-        c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM commodities")
-        self.assertGreater(c.fetchone()[0], 0)
-
-        c.execute("SELECT COUNT(*) FROM countries")
-        self.assertGreater(c.fetchone()[0], 0)
-
-        c.execute("SELECT COUNT(*) FROM barters")
-        self.assertGreater(c.fetchone()[0], 10)
+    def test_reference_catalog_seeded_but_no_fake_barters(self):
+        conn=get_db()
+        self.assertGreater(conn.execute("SELECT COUNT(*) FROM commodities").fetchone()[0],0)
+        self.assertGreater(conn.execute("SELECT COUNT(*) FROM countries").fetchone()[0],0)
+        self.assertEqual(conn.execute("SELECT COUNT(*) FROM barters").fetchone()[0],0)
         conn.close()
 
-    def test_02_summary_metrics(self):
-        """Verify calculation of global median implied Pi price."""
-        summary = get_summary_metrics()
-        self.assertIn("global_median_pi_usd", summary)
-        self.assertGreater(summary["global_median_pi_usd"], 5.0)
-        self.assertLess(summary["global_median_pi_usd"], 100.0)
-        self.assertGreater(summary["total_barters_count"], 10)
-        self.assertIn("gcv_divergence_pct", summary)
+    def test_empty_summary_is_explicit(self):
+        data=get_summary_metrics()
+        self.assertIsNone(data["global_median_pi_usd"])
+        self.assertEqual(data["total_barters_count"],0)
+        self.assertEqual(data["data_status"],"NO_VERIFIED_DATA")
+        self.assertIsNone(data["confidence_score"])
 
-    def test_03_commodity_indices(self):
-        """Verify commodity baskets (Rice, Coffee, Phone, etc.)."""
-        baskets = get_commodity_indices()
-        self.assertGreaterEqual(len(baskets), 5)
-        symbols = [b["symbol"] for b in baskets]
-        self.assertIn("RICE", symbols)
-        self.assertIn("COFFEE", symbols)
-        self.assertIn("PHONE", symbols)
+    def test_commodity_indices_do_not_invent_prices_or_trades(self):
+        rows=get_commodity_indices(); self.assertGreaterEqual(len(rows),5)
+        for row in rows:
+            self.assertIsNone(row["median_pi_price"])
+            self.assertIsNone(row["implied_pi_usd"])
+            self.assertEqual(row["sample_trades_count"],0)
 
-        for b in baskets:
-            self.assertGreater(b["benchmark_usd"], 0)
-            self.assertGreater(b["median_pi_price"], 0)
+    def test_country_parities_do_not_invent_ppp(self):
+        rows=get_country_parities(); self.assertGreaterEqual(len(rows),5)
+        for row in rows:
+            self.assertIsNone(row["purchasing_power_ratio"])
+            self.assertIsNone(row["median_barter_pi_usd"])
 
-    def test_04_country_parities(self):
-        """Verify regional PPP calculations."""
-        countries = get_country_parities()
-        self.assertGreaterEqual(len(countries), 5)
-        codes = [c["country_code"] for c in countries]
-        self.assertIn("ID", codes)
-        self.assertIn("VN", codes)
-        self.assertIn("NG", codes)
+    def test_calculator_waits_for_verified_sample(self):
+        result=calculate_barter_fair_price(fiat_amount=100,fiat_currency="USD")
+        self.assertFalse(result["available"])
+        self.assertIn("No verified",result["reason"])
 
-        for cty in countries:
-            self.assertGreater(cty["purchasing_power_ratio"], 0)
+    def test_tx_hash_format_is_not_proof(self):
+        self.assertEqual(verify_tx_hash("bad")["status"],"INVALID_FORMAT")
+        import urllib.error
+        with patch("backend.blockchain._get_json", side_effect=urllib.error.URLError("offline")):
+            result = verify_tx_hash("a"*64)
+        self.assertFalse(result["verified"])
+        self.assertEqual(result["status"], "HORIZON_UNREACHABLE")
 
-    def test_05_barter_fair_price_calculator(self):
-        """Test the Barter fair price converter logic."""
-        # Convert $100 USD
-        calc = calculate_barter_fair_price(fiat_amount=100.0, fiat_currency="USD")
-        self.assertEqual(calc["input_value"], 100.0)
-        self.assertGreater(calc["recommended_pi_range"]["median_fair_pi"], 0)
-        self.assertGreater(calc["recommended_pi_range"]["conservative_pi"], calc["recommended_pi_range"]["optimistic_pi"])
+    def test_horizon_verifier_matches_amount_and_recipient(self):
+        recipient = "G" + "A" * 55
+        transaction = {"successful": True, "ledger": 123, "created_at": "2026-11-02T00:00:00Z"}
+        operations = {"_embedded": {"records": [{"type": "payment", "asset_type": "native", "amount": "1.0000000", "to": recipient}]}}
+        with patch("backend.blockchain._get_json", side_effect=[transaction, operations]):
+            result = verify_tx_hash("e" * 64, expected_pi_amount=1.0, expected_recipient=recipient)
+        self.assertTrue(result["verified"])
+        self.assertEqual(result["status"], "VERIFIED_ONCHAIN")
 
-        # Convert Rice commodity basket
-        calc_rice = calculate_barter_fair_price(commodity_id="rice")
-        self.assertIn("Rice", calc_rice["input_unit"])
+        with patch("backend.blockchain._get_json", side_effect=[transaction, operations]):
+            result = verify_tx_hash("e" * 64, expected_pi_amount=2.0, expected_recipient=recipient)
+        self.assertEqual(result["status"], "AMOUNT_MISMATCH")
 
-    def test_06_blockchain_tx_format_verifier(self):
-        """Test the Pi transaction hash verifier."""
-        # Invalid hash format
-        inv = verify_tx_hash("invalid-short-hash")
-        self.assertFalse(inv["verified"])
-        self.assertEqual(inv["status"], "INVALID_FORMAT")
+        with patch("backend.blockchain._get_json", side_effect=[transaction, operations]):
+            result = verify_tx_hash("e" * 64, expected_pi_amount=1.0, expected_recipient="G" + "B" * 55)
+        self.assertEqual(result["status"], "RECIPIENT_MISMATCH")
 
-        # 64-char valid hex structure
-        dummy_hex = "a" * 64
-        res = verify_tx_hash(dummy_hex)
-        self.assertIn("status", res)
+    def test_insert_rejects_unverified_records(self):
+        data={"item_name":"Test item","commodity_id":"rice","country_code":"ID","city":"Jakarta","merchant_name":"Test merchant","pi_amount":1,"fiat_value":10,"fiat_currency":"USD","tx_hash":"a"*64,"recipient_address":"G"+"A"*55}
+        with self.assertRaises(ValueError): insert_barter(data,verification_status="PENDING")
 
-    def test_07_insert_new_barter(self):
-        """Test submitting a new barter record."""
-        sub = {
-            "item_name": "Test Honey Jar 500g",
-            "commodity_id": "groceries",
-            "country_code": "ID",
-            "city": "Bogor",
-            "merchant_name": "Madu Pioneer",
-            "pi_amount": 0.25,
-            "fiat_value": 85000,
-            "fiat_currency": "IDR",
-            "tx_hash": "b" * 64,
-            "notes": "Unit test transaction"
-        }
-        res = insert_barter(sub)
-        self.assertIn("id", res)
-        self.assertGreater(res["implied_pi_usd"], 0)
+    def test_insert_verified_record_and_analytics(self):
+        data={"item_name":"Test item","commodity_id":"rice","country_code":"ID","city":"Jakarta","merchant_name":"Test merchant","pi_amount":1,"fiat_value":10,"fiat_currency":"USD","tx_hash":"b"*64,"recipient_address":"G"+"A"*55}
+        result=insert_barter(data,verification_status="VERIFIED_ONCHAIN")
+        self.assertEqual(result["status"],"VERIFIED_ONCHAIN")
+        init_db()  # Repeated cold starts must not quarantine newly verified rows.
+        self.assertEqual(get_summary_metrics()["total_barters_count"],1)
+        conn=get_db(); conn.execute("DELETE FROM barters WHERE id=?",(result["id"],)); conn.commit(); conn.close()
 
-        # Clean up test row immediately so it doesn't pollute database
-        from backend.database import get_db
-        conn = get_db()
-        conn.cursor().execute("DELETE FROM barters WHERE id = ?", (res["id"],))
-        conn.commit()
-        conn.close()
-
-
-if __name__ == "__main__":
-    unittest.main()
-
+if __name__=="__main__": unittest.main()

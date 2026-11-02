@@ -43,7 +43,7 @@
         <div class="cluster-status-box">
           <div class="cluster-header">
             <span>Mainnet Cluster 01</span>
-            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">99.98%</span>
+            <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">Checking</span>
           </div>
           <div class="cluster-pill">
             <span class="pulse-dot"></span>
@@ -129,7 +129,7 @@
           <button class="header-tab-pill" onclick="scrollToSection('section-calculator')">Settlement Calc</button>
           <div class="block-sync-pill">
             <span class="pulse-dot"></span>
-            <span id="header-block-sync">Block #29,486,050</span>
+            <span id="header-block-sync">Pi Mainnet status: checking…</span>
           </div>
         </div>
 
@@ -153,14 +153,14 @@
           <div class="kpi-card">
             <div class="kpi-label-row">
               <span>Global Median PPP Index</span>
-              <span class="kpi-badge badge-green" id="kpi-delta-24h">+4.12% 24h</span>
+              <span class="kpi-badge badge-green" id="kpi-delta-24h">— 24h</span>
             </div>
             <div class="kpi-value-row">
-              <span class="kpi-big-num" id="kpi-price">1 π = $24.80</span>
+              <span class="kpi-big-num" id="kpi-price">No verified data</span>
               <span class="kpi-sub-unit">USD-PPP</span>
             </div>
             <div class="kpi-meta-row">
-              <span>Range: $22.10 - $25.90</span> • <span style="color: var(--yield-emerald-light);">91.4% Weighted</span>
+              <span>No verified price range</span> • <span style="color: var(--yield-emerald-light);">No confidence score</span>
             </div>
           </div>
 
@@ -171,26 +171,26 @@
               <span class="kpi-badge badge-purple">On-Chain Settled</span>
             </div>
             <div class="kpi-value-row">
-              <span class="kpi-big-num" id="kpi-vol-pi">142,500 π</span>
-              <span class="kpi-sub-unit" id="kpi-vol-usd">≈ $3.53M USD</span>
+              <span class="kpi-big-num" id="kpi-vol-pi">0 π</span>
+              <span class="kpi-sub-unit" id="kpi-vol-usd">≈ $0 USD</span>
             </div>
             <div class="kpi-meta-row">
-              <span>Physical Delivery: <strong>1,410 Deliveries</strong></span>
+              <span>Physical delivery count: <strong>Not collected</strong></span>
             </div>
           </div>
 
-          <!-- Card 3: Consensus Participation -->
+          <!-- Card 3: Verified Barter Participation -->
           <div class="kpi-card">
             <div class="kpi-label-row">
-              <span>Consensus Participation</span>
-              <span class="kpi-badge badge-amber" id="kpi-hubs">48 Sovereign Hubs</span>
+              <span>Verified Barter Participation</span>
+              <span class="kpi-badge badge-amber" id="kpi-hubs">0 active countries</span>
             </div>
             <div class="kpi-value-row">
-              <span class="kpi-big-num" id="kpi-trades-count">12,840</span>
+              <span class="kpi-big-num" id="kpi-trades-count">0</span>
               <span class="kpi-sub-unit">trades</span>
             </div>
             <div class="kpi-meta-row">
-              <span>Pioneer Merchants Active: <strong style="color: var(--basket-amber-light);">4,912 Verified</strong></span>
+              <span>Pioneer merchants active: <strong style="color: var(--basket-amber-light);">No verified count</strong></span>
             </div>
           </div>
 
@@ -198,14 +198,14 @@
           <div class="kpi-card">
             <div class="kpi-label-row">
               <span>Dispersion & Node Sync</span>
-              <span class="kpi-badge badge-green">Low Variance</span>
+              <span class="kpi-badge badge-green">Awaiting sample</span>
             </div>
             <div class="kpi-value-row">
-              <span class="kpi-big-num">σ = 2.14</span>
-              <span class="kpi-sub-unit">Index Spread</span>
+              <span class="kpi-big-num">—</span>
+              <span class="kpi-sub-unit">Variance unavailable</span>
             </div>
             <div class="kpi-meta-row">
-              <span>Enclosed Mainnet: <strong style="color: var(--yield-emerald-light);">99.84% Cryptographic</strong></span>
+              <span>Mainnet verification: <strong style="color: var(--yield-emerald-light);">Live Horizon check</strong></span>
             </div>
           </div>
         </section>
@@ -217,7 +217,7 @@
             <div class="section-title-wrap">
               <div class="section-title-text">
                 <span>🧺</span>
-                <span>Core Real-World Commodity Basket Indices</span>
+                <span>Reference Commodity Baskets & Verified Pi Samples</span>
               </div>
               <span class="section-subtitle-text">Physical Redemption Weights</span>
             </div>
@@ -225,7 +225,7 @@
             <div style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); display: flex; gap: 6px; align-items: center;">
               <span>Basket Currency:</span>
               <span style="color: #fff; background: var(--surface-card); border: 1px solid var(--border-subtle); padding: 2px 6px; border-radius: 3px;">• Native π</span>
-              <span style="color: var(--text-muted); padding: 2px 6px;">USD Equiv</span>
+              <span style="color: var(--text-muted); padding: 2px 6px;">Reference USD estimate</span>
             </div>
           </div>
 
@@ -289,7 +289,7 @@
                 <span>Arbitrage & Fair-Price Calc</span>
               </div>
               <span style="font-family: var(--font-mono); font-size: 10px; color: var(--yield-emerald-light); background: var(--yield-emerald-dim); border: 1px solid rgba(16,185,129,0.3); padding: 2px 6px; border-radius: 3px;">
-                Empirical Engine Active
+                Verified sample required
               </span>
             </div>
 
@@ -321,13 +321,13 @@
               <!-- Result Box -->
               <div class="calc-result-box">
                 <div class="calc-result-label">Recommended Fair Pi Settlement</div>
-                <div class="calc-result-main" id="calc-res-pi">4.0322 π</div>
-                <div class="calc-result-corridor" id="calc-res-corridor">±3.8% Spread Corridor: 3.92P - 4.18P</div>
+                <div class="calc-result-main" id="calc-res-pi">Awaiting verified data</div>
+                <div class="calc-result-corridor" id="calc-res-corridor">No verified market sample yet</div>
               </div>
 
               <!-- Anti-Scam Shield -->
               <div class="anti-scam-shield">
-                <strong>🛡️ Anti-Scam Consensus Shield:</strong> Transactions exceeding &gt;15% deviation from empirical $24.80 index require consensus proof verification and won't earn node staking dividends.
+                <strong>🛡️ Anti-Scam Consensus Shield:</strong> PiBarX currently has no verified market baseline. Always confirm the payment on Pi Mainnet; this interface does not issue staking rewards or enforce network consensus.
               </div>
 
               <!-- Quick Fills -->
@@ -342,9 +342,9 @@
               </div>
 
               <!-- Action Lock Button -->
-              <button class="btn-lock-corridor" onclick="alert('🔒 Corridor locked for 15 minutes at $24.80/Pi benchmark rate. Quote valid for P2P Pi Wallet handshake.')">
+              <button class="btn-lock-corridor" disabled title="Settlement locking is not implemented">
                 <span>🔒</span>
-                <span>Lock Settlement Corridor for 15m</span>
+                <span>Settlement locking unavailable</span>
               </button>
             </div>
           </div>
@@ -358,7 +358,7 @@
                 <span>Live Verified Barter Ledger Feed</span>
               </div>
               <div style="display: flex; gap: 6px; align-items: center;">
-                <button id="tab-btn-barters" class="header-tab-pill active" onclick="switchFeedMode('barters')" style="font-size: 10px; padding: 3px 8px;">🛒 Audited Barters (27)</button>
+                <button id="tab-btn-barters" class="header-tab-pill active" onclick="switchFeedMode('barters')" style="font-size: 10px; padding: 3px 8px;">🛒 Verified Barters (0)</button>
                 <button id="tab-btn-onchain" class="header-tab-pill" onclick="switchFeedMode('onchain')" style="font-size: 10px; padding: 3px 8px;">⛓️ Live Pi Mainnet Stream</button>
               </div>
             </div>
@@ -472,7 +472,12 @@
 
           <div>
             <div class="form-label">Pi Blockchain Transaction Hash (TxID 64-Hex)</div>
-            <input type="text" id="form-tx-hash" class="form-input" placeholder="64-character hex hash from Pi Wallet app (optional)">
+            <input type="text" id="form-tx-hash" class="form-input" placeholder="64-character hex TxID from Pi Wallet app" required>
+          </div>
+
+          <div>
+            <div class="form-label">Merchant Pi Wallet Address (Recipient) *</div>
+            <input type="text" id="form-recipient-address" class="form-input" placeholder="G + 55-character public wallet address" minlength="56" maxlength="56" pattern="G[A-Z2-7]{55}" required>
           </div>
 
           <div>
@@ -490,6 +495,6 @@
   </div>
 
   <!-- Core JavaScript Application Logic -->
-  <script src="/static/js/app.js?v=2.5.0"></script>
+  <script src="/static/js/app.js?v=2.6.0"></script>
 </body>
 </html>
